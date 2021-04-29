@@ -5,7 +5,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { FaUser } from 'react-icons/fa'
 
 export const UserButton = () => {
-    const { loggedIn, userInfo } = useContext(AuthContext)
+    const { loggedIn, userInfo, clearAuth } = useContext(AuthContext)
 
     const [isSectionOpen, setIsSectionOpen] = useState(false)
     const dropDownElement = useRef<HTMLDivElement>()
@@ -30,6 +30,11 @@ export const UserButton = () => {
         } else {
             router.push('/login')
         }
+    }
+
+    const handleLogout = async () => {
+        clearAuth()
+        setIsSectionOpen(false)
     }
 
     useEffect(() => {
@@ -69,11 +74,14 @@ export const UserButton = () => {
                         </div>
                         <div className="mt-5">
                             <Link href="">
-                                <a className="px-4 py-2 bg-red-400 rounded-full hover:bg-red-500 flex">
+                                <button
+                                    onClick={handleLogout}
+                                    className="px-4 py-2 w-full bg-red-400 rounded-full hover:bg-red-500 flex"
+                                >
                                     <p className="text-sm m-auto font-medium text-white leading-none">
                                         Logout
                                     </p>
-                                </a>
+                                </button>
                             </Link>
                         </div>
                     </>

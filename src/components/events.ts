@@ -1,8 +1,11 @@
 export enum ComponentEvents {
     TagSelected = 'tagselected',
     FilterChanged = 'filterchanged',
-    PaginationChanged = 'paginationChanged',
+    ItemListPaginationChanged = 'ItemListPaginationChanged',
     ItemListModified = 'itemListModified',
     ItemDeleteRequested = 'itemDeleteRequested',
     ItemDeleteConfirmed = 'itemDeleteConfirmed',
+    AdminModeTriggered = 'adminModeTriggered',
+    AdminSectionSelected = 'adminSectionSelected',
+    AdminItemPanelItemEditSelected = 'adminItemPanelItemEditSelected',
 }

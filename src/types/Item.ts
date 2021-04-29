@@ -1,8 +1,14 @@
 import { ItemType } from './ItemType'
+import { User } from './User'
 
 export type Item = {
     id: string
     name: string
+    content: string
+    mainImage: string
     type: ItemType
-    userId: string
+    user: User
+    active: boolean
+    createdAt: Date
+    updatedAt: Date
 }

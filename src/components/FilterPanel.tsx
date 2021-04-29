@@ -4,9 +4,10 @@ import { useBus } from 'react-bus'
 import { useTheme } from 'next-themes'
 import { useFetch } from '@/backend/requestHooks'
 import toast from 'react-hot-toast'
-import ItemType from '@/types/ItemType'
 import { ComponentEvents } from './events'
 import { SkeletonLoader } from './SkeletonLoader'
+import { ItemType } from '@/types/ItemType'
+import { TextInput } from './TextInput'
 
 type SelectorProps = {
     color: string
@@ -16,7 +17,7 @@ type SelectorProps = {
 }
 
 const ActivitySelector = ({ color, itemType, active, callback }: SelectorProps) => {
-    var elementClass = classNames(
+    const elementClass = classNames(
         'focus:outline-none',
         'uppercase',
         'cursor-default',
@@ -142,11 +143,7 @@ export const FilterPanel = ({ selectedItemType }: Props) => {
             </div>
             <div className="w-full my-5 mx-auto rounded-xl bg-gray-100 dark:bg-gray-800 shadow-lg p-10 text-gray-800 dark:text-gray-100 relative overflow-hidden min-w-80 max-w-3xl transition-colors">
                 <div className="relative mt-1">
-                    <input
-                        type="text"
-                        className="w-full pl-3 pr-10 py-2 border-2 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 rounded-xl hover:border-gray-300 dark:hover:border-gray-700 focus:outline-none focus:border-blue-500 transition-colors"
-                        placeholder="Search..."
-                    />
+                    <TextInput placeholder="Search..." name="searchInput" />
                     <button className="block w-7 h-7 text-center text-xl leading-0 absolute top-2 right-2 text-gray-400 focus:outline-none hover:text-gray-900 transition-colors">
                         <i className="mdi mdi-magnify"></i>
                     </button>

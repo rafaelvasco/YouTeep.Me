@@ -25,3 +25,27 @@ body {
 svg.paint-icon {
     fill: currentcolor;
 }
+
+input:checked ~ .block {
+    background-color: #289455;
+}
+
+input:checked ~ .dot {
+    transform: translateX(100%);
+    background-color: #37ff8a;
+}
+
+.mde-tabs > button {
+    color: black;
+    padding: 0.5em;
+}
+
+.mde-text {
+    color: black;
+    font-weight: normal;
+}
+
+.mde-preview {
+    background: white;
+    color: black;
+}

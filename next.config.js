@@ -1,5 +1,5 @@
 module.exports = {
     images: {
-        domains: ['dl.airtable.com'],
+        domains: ['ytmbucket.s3.amazonaws.com', 'ytmbucket.s3.sa-east-1.amazonaws.com'],
     },
 }

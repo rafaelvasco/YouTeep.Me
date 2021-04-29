@@ -8,7 +8,9 @@ import { AuthContext } from '@/contexts/authContext'
 import { createItem } from '@/backend/itemService'
 import { ComponentEvents } from './events'
 import { ItemType } from '@/types/ItemType'
-import { Item } from '@/types/Item'
+import { Select } from './Select'
+import { TextInput } from './TextInput'
+import { ImageInputFile } from './ImageInputFile'
 
 export const ItemCreator = () => {
     const [itemTypes, itemTypesFetchError] = useFetch<ItemType[]>('item/types')
@@ -26,14 +28,13 @@ export const ItemCreator = () => {
     const eventBus = useBus()
 
     const onSubmit = async (data: any) => {
-        const item: Item = {
-            id: null,
-            userId: userInfo.id,
+        const result = await createItem({
             name: data.name,
-            type: itemTypes.filter((it) => it.id === data.itemType)[0],
-        }
-
-        const result = await createItem(item)
+            userId: userInfo.id,
+            typeId: data.itemType,
+            content: data.content || '',
+            mainImage: data.mainImage[0],
+        })
 
         if (result) {
             toast.success(`Item Created Successfully!`)
@@ -46,6 +47,7 @@ export const ItemCreator = () => {
 
     const formOptions = {
         name: { required: 'Name field is required' },
+        mainImage: { required: 'Please select a main Image for the Item.' },
     }
 
     useEffect(() => {
@@ -60,14 +62,28 @@ export const ItemCreator = () => {
                 <div className="relative mt-1">
                     <form className="grid grid-cols-1 gap-6" onSubmit={handleSubmit(onSubmit)}>
                         <label className="block">
+                            <span className="text-gray-700 dark:text-gray-200">Image:</span>
+                            <ImageInputFile
+                                name="mainImage"
+                                ref={register(formOptions.mainImage)}
+                            />
+                            {/* <input
+                                id="mainImage"
+                                ref={register(formOptions.mainImage)}
+                                className="bg-gray-200 dark:bg-gray-900 p-2 w-full min-w-min rounded-lg shadow-inner border-none text-black dark:text-white focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                name="mainImage"
+                                type="file"
+                            /> */}
+                            <small className="text-red-500">
+                                {errors.mainImage && errors.mainImage.message}
+                            </small>
+                        </label>
+                        <label className="block">
                             <span className="text-gray-700 dark:text-gray-200">Name:</span>
-                            <input
-                                id="name"
+                            <TextInput
                                 ref={register(formOptions.name)}
-                                className="bg-white dark:bg-gray-900 mt-1 block w-full rounded-md border-gray-200 dark:border-gray-800 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                                 name="name"
-                                type="text"
-                                autoComplete="name"
+                                className="mt-1 w-full"
                             />
                             <small className="text-red-500">
                                 {errors.name && errors.name.message}
@@ -76,7 +92,18 @@ export const ItemCreator = () => {
 
                         <label className="block">
                             <span className="text-gray-700 dark:text-gray-200">Type:</span>
-                            <select
+                            <Select
+                                name="itemType"
+                                className="ml-4"
+                                ref={register}
+                                options={itemTypes.map((type) => {
+                                    return {
+                                        label: type.name.toUpperCase(),
+                                        value: type.id,
+                                    }
+                                })}
+                            />
+                            {/* <select
                                 name="itemType"
                                 ref={register}
                                 className="bg-white dark:bg-gray-900 uppercase block w-full mt-1 rounded-md border-gray-200 dark:border-gray-800 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
@@ -92,7 +119,7 @@ export const ItemCreator = () => {
                                 ) : (
                                     <option>LOADING...</option>
                                 )}
-                            </select>
+                            </select> */}
                         </label>
 
                         <button

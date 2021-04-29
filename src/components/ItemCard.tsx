@@ -1,11 +1,11 @@
 import Image from 'next/image'
-import Item from '@/types/Item'
 import { useContext } from 'react'
 import { AuthContext } from '@/contexts/authContext'
 import { RiDeleteBin2Fill } from 'react-icons/ri'
 import { useBus } from 'react-bus'
 import { ComponentEvents } from './events'
 import { LinkEx } from './Link'
+import { Item } from '@/types/Item'
 
 type Props = {
     item: Item
@@ -24,7 +24,7 @@ export const ItemCard = ({ item, href }: Props) => {
                     <LinkEx href={href} aria-label={`Link to ${item.name}`}>
                         <Image
                             alt={item.name}
-                            src="/static/images/time-machine.jpg"
+                            src={item.mainImage ?? '/static/images/time-machine.jpg'}
                             className="lg:h-48 md:h-36 object-cover object-center bg-white"
                             width={544}
                             height={306}
@@ -33,7 +33,7 @@ export const ItemCard = ({ item, href }: Props) => {
                 ) : (
                     <Image
                         alt={item.name}
-                        src="/static/images/time-machine.jpg"
+                        src={item.mainImage ?? '/static/images/time-machine.jpg'}
                         className="lg:h-48 md:h-36 object-cover object-center bg-white"
                         width={544}
                         height={306}
@@ -53,20 +53,6 @@ export const ItemCard = ({ item, href }: Props) => {
                         {item.type.name}
                     </p>
                 </div>
-                {item.userId === userInfo.id ? (
-                    <div className="absolute bottom-5 right-5">
-                        <button
-                            className="text-red-500 hover:text-red-400 focus:text-red-700 p-2 focus:outline-none outline-none"
-                            onClick={() => {
-                                eventBus.emit(ComponentEvents.ItemDeleteRequested, item.id)
-                            }}
-                        >
-                            <RiDeleteBin2Fill size={32} />
-                        </button>
-                    </div>
-                ) : (
-                    false
-                )}
             </div>
         </div>
     )

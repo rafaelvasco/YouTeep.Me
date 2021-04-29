@@ -3,13 +3,17 @@ import { login } from '@/backend/authService'
 import { PageSeo } from '@/components/SEO'
 import { AuthContext } from '@/contexts/authContext'
 import siteMetadata from '@/data/siteMetadata.json'
-import { LoginData } from '@/types/LoginData'
+import { LoginRequest } from '@/types/LoginRequest'
 import { useRouter } from 'next/router'
 import { useContext, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
-const Login = () => {
-    const { storeAuth } = useContext(AuthContext)
+type Props = {
+    redirectToHome: boolean
+}
+
+const Login = ({ redirectToHome = true }: Props) => {
+    const { storeAuth, loggedIn } = useContext(AuthContext)
 
     useEffect(() => {}, [])
 
@@ -25,14 +29,16 @@ const Login = () => {
     const router = useRouter()
 
     const onSubmit = async (data: any) => {
-        const user = await login(data as LoginData)
+        const user = await login(data as LoginRequest)
 
         if (user) {
             storeAuth(user)
 
             reset()
 
-            router.push('/')
+            if (redirectToHome) {
+                router.push('/')
+            }
         } else {
             setValue('password', '')
         }
@@ -51,7 +57,7 @@ const Login = () => {
                 url={siteMetadata.siteUrl}
             />
 
-            <div className="my-5">
+            <div className="my-5" hidden={loggedIn}>
                 <div className="m-auto flex flex-col w-full max-w-md px-4 py-8 bg-white rounded-lg shadow dark:bg-gray-800 sm:px-6 md:px-8 lg:px-10">
                     <div className="self-center mb-6 text-xl font-light text-gray-600 sm:text-2xl dark:text-white">
                         Login To Your Account

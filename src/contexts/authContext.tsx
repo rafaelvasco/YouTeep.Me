@@ -1,11 +1,13 @@
-import { refreshAuthorize } from '@/backend/authService'
+import { logout, refreshAuthorize } from '@/backend/authService'
 import { User } from '@/types/User'
+import { UserRole } from '@/types/UserRole'
 import { createContext, useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 type LoggedUserInfo = {
     id: string
     email: string
-    role: string
+    role: UserRole
 }
 
 type AuthContextProps = {
@@ -23,7 +25,7 @@ export const AuthContainer = ({ children }) => {
     const [userInfo, setUserInfo] = useState({
         id: null,
         email: '',
-        role: '',
+        role: null,
     } as LoggedUserInfo)
 
     const storeAuth = (user: User) => {
@@ -35,9 +37,15 @@ export const AuthContainer = ({ children }) => {
         })
     }
 
-    const clearAuth = () => {
-        setLoggedIn(false)
-        setUserInfo({ email: '', role: '', id: null })
+    const clearAuth = async () => {
+        const result = await logout()
+
+        if (result) {
+            setLoggedIn(false)
+            setUserInfo({ email: '', role: null, id: null })
+        }
+
+        toast.success('User Logged Out')
     }
 
     const tryAuthorize = async (): Promise<User | null> => {

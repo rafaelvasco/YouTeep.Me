@@ -19,7 +19,7 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
                     <p className="text-gray-900">{props.message}</p>
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end absolute right-4 bottom-4">
                     <button
                         className="bg-gray-400 hover:bg-gray-500 focus:bg-gray-700 inline-flex outline-none focus:outline-none rounded-lg px-3 py-1"
                         onClick={props.onClose}

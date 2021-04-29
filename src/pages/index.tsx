@@ -13,8 +13,10 @@ import { confirmAlert } from 'react-confirm-alert'
 import { ComponentEvents } from '@/components/events'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { FilterPanel } from '@/components/FilterPanel'
-import { PaginatedItemsList } from '@/components/PaginatedItemsList'
 import { ItemCreator } from '@/components/ItemCreator'
+import { AdminPanel } from '@/components/AdminPanel'
+import { MainItemList } from '@/components/MainItemList'
+import { SectionContainer } from '@/components/SectionContainer'
 
 const Home = () => {
     const [itemsFilter, setFilter] = useState<ItemFilter>({
@@ -29,6 +31,8 @@ const Home = () => {
     const eventBus = useBus()
 
     const { loggedIn } = useContext(AuthContext)
+
+    const [adminActive, setAdminActive] = useState(false)
 
     const updateQueryParams = (itemFilter: ItemFilter) => {
         if (!itemFilterEmpty(itemFilter)) {
@@ -61,7 +65,7 @@ const Home = () => {
         setFilter({ ...itemsFilter, itemTypeId: filter.itemTypeId })
     })
 
-    useListener(ComponentEvents.PaginationChanged, (newPage: number) => {
+    useListener(ComponentEvents.ItemListPaginationChanged, (newPage: number) => {
         setFilter({ ...itemsFilter, page: newPage })
     })
 
@@ -94,6 +98,10 @@ const Home = () => {
         }
     })
 
+    useListener(ComponentEvents.AdminModeTriggered, () => {
+        setAdminActive(!adminActive)
+    })
+
     return (
         <>
             <PageSeo
@@ -103,10 +111,18 @@ const Home = () => {
             />
 
             <div className="my-5">
-                <FilterPanel selectedItemType={itemsFilter?.itemTypeId} />
-                {loggedIn ? <ItemCreator /> : null}
+                {!adminActive ? (
+                    <>
+                        <SectionContainer>
+                            <FilterPanel selectedItemType={itemsFilter?.itemTypeId} />
+                            {loggedIn ? <ItemCreator /> : null}
 
-                <PaginatedItemsList filter={itemsFilter} />
+                            <MainItemList filter={itemsFilter} />
+                        </SectionContainer>
+                    </>
+                ) : (
+                    <AdminPanel />
+                )}
             </div>
         </>
     )
