@@ -38,10 +38,10 @@ interface TableProps<T extends MinTableItem> {
 }
 
 const tableBaseClass =
-    'mx-auto w-full whitespace-nowrap rounded-lg bg-white dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-600 overflow-hidden '
+    'mx-auto w-full whitespace-nowrap rounded-lg bg-gray-100 dark:bg-gray-800 divide-y divide-gray-300 dark:divide-gray-600 overflow-hidden '
 
 const tableHeadTrClass =
-    'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-200 uppercase text-sm leading-normal '
+    'bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-200 uppercase text-sm leading-normal '
 
 const tableHeadThBaseClass = 'font-semibold text-sm uppercase px-6 py-4 text-left '
 

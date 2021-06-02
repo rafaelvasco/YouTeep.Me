@@ -5,13 +5,14 @@ import { ComponentEvents } from './events'
 import { AdminPanelUsers } from './AdminPanelUsers'
 import { AdminPanelItems } from './AdminPanelItems'
 import { ItemContentEditor } from './ItemContentEditor'
+import { ItemCreator } from './ItemCreator'
 
 type AdminSectionButtonProps = {
     id: number
     label: string
     startSelected?: boolean
 }
-const SECTIONS = ['Users', 'Items', 'Item Content', 'Section4']
+const SECTIONS = ['Users', 'Items', 'Item Content']
 
 const AdminSectionButton = ({ id, label, startSelected }: AdminSectionButtonProps) => {
     const [selected, setSelected] = useState(startSelected || false)
@@ -25,15 +26,15 @@ const AdminSectionButton = ({ id, label, startSelected }: AdminSectionButtonProp
         'outline-none',
         'focus:outline-none',
         'text-xs',
-
+        'text-white',
         'rounded-lg',
         {
-            ['dark:bg-green-500']: selected,
-            ['bg-green-500']: selected,
+            ['dark:bg-blue-500']: selected,
+            ['bg-blue-500']: selected,
         },
         {
-            ['dark:bg-blue-500']: !selected,
-            ['bg-gray-300']: !selected,
+            ['dark:bg-gray-700']: !selected,
+            ['bg-gray-500']: !selected,
         }
     )
 
@@ -104,18 +105,16 @@ export const AdminPanel = () => {
     return (
         <div className="h-screen">
             <div className="flex space-x-4 h-4/5">
-                <div className="inline-flex flex-col dark:bg-blue-900 bg-gray-100 shadow-md rounded-lg p-2 w-1/12 h-full space-y-3">
+                <div className="inline-flex flex-col bg-gray-200 dark:bg-gray-800 shadow-md rounded-lg p-2 w-1/12 h-full space-y-3">
                     {state.sectionButtons}
                 </div>
-                <div className="inline-flex dark:bg-blue-900 bg-gray-100 shadow-md rounded-lg p-5 w-11/12 h-full">
+                <div className="inline-flex p-5 w-11/12 h-full">
                     {state.sectionIdx === UserSection ? (
                         <AdminPanelUsers />
                     ) : state.sectionIdx === ItemSection ? (
                         <AdminPanelItems />
                     ) : state.sectionIdx === ItemContentSection ? (
                         <ItemContentEditor itemId={itemIdEdit} />
-                    ) : state.sectionIdx === 3 ? (
-                        <></>
                     ) : null}
                 </div>
             </div>

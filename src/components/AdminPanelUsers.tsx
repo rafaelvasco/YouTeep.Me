@@ -4,8 +4,8 @@ import { User } from '@/types/User'
 import { UserRole } from '@/types/UserRole'
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
+import Loader from 'react-loader-spinner'
 import { Select } from './Select'
-import { SkeletonLoader } from './SkeletonLoader'
 import { Table } from './Table'
 import { Toggler } from './Toggler'
 
@@ -60,6 +60,7 @@ export const AdminPanelUsers = () => {
                         role: (user) => {
                             return (
                                 <Select
+                                    name="userRole"
                                     data={user}
                                     value={user.role}
                                     options={[
@@ -73,7 +74,15 @@ export const AdminPanelUsers = () => {
                     }}
                 />
             ) : (
-                <SkeletonLoader />
+                <div className="flex justify-center align-middle w-full h-full">
+                    <Loader
+                        type="Puff"
+                        color="#00BFFF"
+                        height={100}
+                        width={100}
+                        timeout={3000} //3 secs
+                    />
+                </div>
             )}
         </>
     )

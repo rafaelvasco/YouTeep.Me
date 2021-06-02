@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react'
 import classNames from 'classnames'
-import { useBus } from 'react-bus'
 import { useTheme } from 'next-themes'
 import { useFetch } from '@/backend/requestHooks'
 import toast from 'react-hot-toast'
-import { ComponentEvents } from './events'
-import { SkeletonLoader } from './SkeletonLoader'
-import { ItemType } from '@/types/ItemType'
+import { everything, ItemType } from '@/types/ItemType'
 import { TextInput } from './TextInput'
+import { useAppContext } from '@/contexts/appContext'
 
 type SelectorProps = {
     color: string
@@ -50,43 +48,19 @@ const ActivitySelector = ({ color, itemType, active, callback }: SelectorProps) 
             }}
             className={elementClass}
         >
-            {itemType?.name ?? 'Everything'}
+            {itemType.name}
         </button>
     )
 }
 
-type Props = {
-    selectedItemType: string
-}
-
-export const FilterPanel = ({ selectedItemType }: Props) => {
-    const eventBus = useBus()
+export const FilterPanel = () => {
+    const appState = useAppContext()
 
     const [mounted, setMounted] = useState(false)
 
     const { theme } = useTheme()
 
     const [itemTypes, itemTypesFetchError] = useFetch<ItemType[]>('item/types')
-
-    const filterItemFromItemId = (itemId: string) => {
-        if (!itemId) {
-            return null
-        }
-        const match = itemTypes.filter((it) => it.id === itemId)
-        if (match.length > 0) {
-            return match[0]
-        }
-
-        return null
-    }
-
-    const [currentItemType, setItemType] = useState<ItemType>(null)
-
-    useEffect(() => {
-        if (selectedItemType) {
-            setItemType(filterItemFromItemId(selectedItemType))
-        }
-    }, [itemTypes])
 
     useEffect(() => {
         if (itemTypesFetchError) {
@@ -97,16 +71,7 @@ export const FilterPanel = ({ selectedItemType }: Props) => {
     useEffect(() => setMounted(true), [])
 
     const onClickSelector = (itemType: ItemType) => {
-        setItemType(itemType)
-
-        var filter = {
-            itemTypeId: null,
-            tags: [],
-        }
-
-        filter.itemTypeId = itemType?.id ?? null
-
-        eventBus.emit(ComponentEvents.FilterChanged, filter)
+        appState.setMainFilterType(itemType.id)
     }
 
     if (!mounted) {
@@ -118,27 +83,25 @@ export const FilterPanel = ({ selectedItemType }: Props) => {
             <div className="flex my-5">
                 <div className="flex m-auto flex-wrap">
                     <ActivitySelector
-                        itemType={null}
+                        itemType={everything()}
                         callback={onClickSelector}
-                        active={currentItemType === null}
+                        active={appState.getMainFilter().type === null}
                         color={theme === 'dark' ? 'white' : 'black'}
                     />
 
-                    {itemTypes ? (
-                        itemTypes.map((type: ItemType) => {
-                            return (
-                                <ActivitySelector
-                                    key={type.id}
-                                    itemType={type}
-                                    callback={onClickSelector}
-                                    active={currentItemType && currentItemType.id === type.id}
-                                    color={type.color}
-                                />
-                            )
-                        })
-                    ) : (
-                        <SkeletonLoader />
-                    )}
+                    {itemTypes
+                        ? itemTypes.map((type: ItemType) => {
+                              return (
+                                  <ActivitySelector
+                                      key={type.id}
+                                      itemType={type}
+                                      callback={onClickSelector}
+                                      active={appState.getMainFilter().type === type.id}
+                                      color={type.color}
+                                  />
+                              )
+                          })
+                        : null}
                 </div>
             </div>
             <div className="w-full my-5 mx-auto rounded-xl bg-gray-100 dark:bg-gray-800 shadow-lg p-10 text-gray-800 dark:text-gray-100 relative overflow-hidden min-w-80 max-w-3xl transition-colors">
@@ -149,11 +112,15 @@ export const FilterPanel = ({ selectedItemType }: Props) => {
                     </button>
                 </div>
                 <div className="absolute top-0 left-0 w-full h-2 flex">
-                    <div className="h-2 bg-green-500 flex-1"></div>
-                    <div className="h-2 bg-yellow-500 flex-1"></div>
-                    <div className="h-2 bg-blue-500 flex-1"></div>
-                    <div className="h-2 bg-purple-500 flex-1"></div>
-                    <div className="h-2 bg-red-500 flex-1"></div>
+                    <div
+                        className={`h-2 bg-${
+                            appState.getMainFilter().type !== null
+                                ? appState.getMainFilterType().color + '-500'
+                                : theme === 'dark'
+                                ? 'white'
+                                : 'black'
+                        } flex-1`}
+                    ></div>
                 </div>
             </div>
         </>

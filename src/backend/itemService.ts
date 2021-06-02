@@ -20,6 +20,8 @@ export const getItem = async (itemId: string): Promise<Item | null> => {
                 toast.error(e.message)
             }
         }
+
+        return null
     }
 }
 
@@ -51,6 +53,7 @@ export const createItem = async (item: ItemCreateRequest): Promise<any | null> =
 export type EditItemProps = {
     name?: string
     type?: string
+    content?: string
 }
 
 export const editItem = async (itemId: string, props: EditItemProps): Promise<any | null> => {

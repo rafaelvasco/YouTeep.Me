@@ -1,14 +1,10 @@
 export type ItemFilter = {
-    itemTypeId: string
-    tags: string[]
+    type: string | null
+    tags: string[] | null
     page: number
     pageSize: number
 }
 
 export const itemFilterEmpty = (filter: ItemFilter) => {
-    return (
-        filter.itemTypeId === null &&
-        (!filter.tags || filter.tags.length === 0) &&
-        filter.page === 1
-    )
+    return filter.type === null && !filter.tags && filter.page === 1
 }

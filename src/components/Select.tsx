@@ -3,6 +3,7 @@ import React, { Ref, useState } from 'react'
 type SelectOption<T> = {
     label: string
     value: T
+    formRef?: Function
 }
 
 type SelectProps<T> = {

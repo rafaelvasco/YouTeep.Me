@@ -9,32 +9,37 @@ import { PageSize } from '@/data/config'
 import { AuthContext } from '@/contexts/authContext'
 import { deleteItem } from '@/backend/itemService'
 import toast from 'react-hot-toast'
-import { confirmAlert } from 'react-confirm-alert'
 import { ComponentEvents } from '@/components/events'
-import { ConfirmModal } from '@/components/ConfirmModal'
 import { FilterPanel } from '@/components/FilterPanel'
-import { ItemCreator } from '@/components/ItemCreator'
 import { AdminPanel } from '@/components/AdminPanel'
 import { MainItemList } from '@/components/MainItemList'
 import { SectionContainer } from '@/components/SectionContainer'
+import dynamic from 'next/dynamic'
+import { Modal } from '@/components/Modal'
+import { Item } from '@/types/Item'
+import { ItemViewModal } from '@/components/ItemViewModal'
+import { ItemCreator } from '@/components/ItemCreator'
+import { useAppContext } from '@/contexts/appContext'
+
+const ModalComponent = dynamic(() => import('@/components/Modal').then((mod) => mod.Modal), {
+    ssr: false,
+}) as typeof Modal
 
 const Home = () => {
-    const [itemsFilter, setFilter] = useState<ItemFilter>({
-        itemTypeId: null,
-        tags: [],
-        page: 1,
-        pageSize: PageSize,
-    })
+    const appState = useAppContext()
+
+    const [loaded, setLoaded] = useState(false)
+
+    const [visualizedItem, setVisualizedItem] = useState<Item>(null)
+
+    const [itemModalOpen, setItemModalOpen] = useState(false)
 
     const router = useRouter()
 
     const eventBus = useBus()
 
-    const { loggedIn } = useContext(AuthContext)
-
-    const [adminActive, setAdminActive] = useState(false)
-
     const updateQueryParams = (itemFilter: ItemFilter) => {
+        console.log('Update Query Params')
         if (!itemFilterEmpty(itemFilter)) {
             const url = buildQueryUrl(itemFilter)
             router.push(url)
@@ -44,50 +49,16 @@ const Home = () => {
     }
 
     useEffect(() => {
-        if (router.query) {
+        if (!loaded && Object.keys(router.query).length > 0) {
+            setLoaded(true)
             const filter = convertQueryToFilter(router.query)
-            setFilter(filter)
-        } else {
-            updateQueryParams(itemsFilter)
+            appState.setMainFilter(filter)
         }
-    }, [])
+    }, [router.query])
 
     useEffect(() => {
-        updateQueryParams(itemsFilter)
-    }, [itemsFilter])
-
-    useListener(ComponentEvents.TagSelected, (tag: string) => {
-        setFilter({ ...itemsFilter, tags: [tag] })
-    })
-
-    useListener(ComponentEvents.FilterChanged, (filter: ItemFilter) => {
-        console.log(`Filter changed: ${JSON.stringify(filter)}`)
-        setFilter({ ...itemsFilter, itemTypeId: filter.itemTypeId })
-    })
-
-    useListener(ComponentEvents.ItemListPaginationChanged, (newPage: number) => {
-        setFilter({ ...itemsFilter, page: newPage })
-    })
-
-    useListener(ComponentEvents.ItemDeleteRequested, async (itemId: string) => {
-        confirmAlert({
-            customUI: ({ onClose }) => {
-                return (
-                    <ConfirmModal
-                        title="Confirm"
-                        message="Are you sure you want to remove this Item ?"
-                        confirmButtonLabel="Yes, Remove"
-                        cancelButtonLabel="No, Cancel"
-                        onConfirm={() => {
-                            eventBus.emit(ComponentEvents.ItemDeleteConfirmed, itemId)
-                            onClose()
-                        }}
-                        onClose={onClose}
-                    />
-                )
-            },
-        })
-    })
+        updateQueryParams(appState.getMainFilter())
+    }, [appState.getMainFilter()])
 
     useListener(ComponentEvents.ItemDeleteConfirmed, async (itemId: string) => {
         console.log('Item delete confirmed')
@@ -98,8 +69,9 @@ const Home = () => {
         }
     })
 
-    useListener(ComponentEvents.AdminModeTriggered, () => {
-        setAdminActive(!adminActive)
+    useListener(ComponentEvents.ItemViewTriggered, (item: Item) => {
+        setItemModalOpen(true)
+        setVisualizedItem(item)
     })
 
     return (
@@ -110,14 +82,19 @@ const Home = () => {
                 url={siteMetadata.siteUrl}
             />
 
+            {itemModalOpen && visualizedItem ? (
+                <ModalComponent setOpen={setItemModalOpen}>
+                    <ItemViewModal item={visualizedItem} />
+                </ModalComponent>
+            ) : null}
+
             <div className="my-5">
-                {!adminActive ? (
+                {!appState.getAdminActive() ? (
                     <>
                         <SectionContainer>
-                            <FilterPanel selectedItemType={itemsFilter?.itemTypeId} />
-                            {loggedIn ? <ItemCreator /> : null}
-
-                            <MainItemList filter={itemsFilter} />
+                            <FilterPanel />
+                            <ItemCreator />
+                            <MainItemList />
                         </SectionContainer>
                     </>
                 ) : (
@@ -130,9 +107,9 @@ const Home = () => {
 
 const convertQueryToFilter = (query): ItemFilter => {
     return {
-        itemTypeId: query.itemTypeId ?? null,
-        tags: query.tags ?? [],
-        page: query.page ?? 1,
+        type: query.type ? (query.type as string) : null,
+        tags: query.tags ?? null,
+        page: parseInt(query.page) ?? 1,
         pageSize: PageSize,
     }
 }

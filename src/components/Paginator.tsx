@@ -1,5 +1,5 @@
 import { PageSize } from '@/data/config'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 type PaginatorProps = {
     page: number
@@ -17,7 +17,7 @@ export const Paginator = (props: PaginatorProps) => {
     }, [props.count])
 
     return (
-        <>
+        <div>
             {props.count > PageSize ? (
                 <>
                     <div className="p-3 flex flex-row justify-center">
@@ -28,21 +28,19 @@ export const Paginator = (props: PaginatorProps) => {
                     <div className="flex flex-row justify-center">
                         {props.page === 1 ? (
                             <button
-                                className="h-10 w-1/2 px-5 m-2 text-indigo-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
+                                className="max-w-min px-20 py-2 m-2 text-indigo-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
                                 onClick={() => {
                                     props.paginate(1)
                                 }}
                             >
                                 Next
                             </button>
-                        ) : (
-                            false
-                        )}
+                        ) : null}
 
                         {props.page > 1 && props.page < maxPage ? (
                             <>
                                 <button
-                                    className="h-10 w-1/2 px-5 m-2 text-indigo-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
+                                    className="max-w-min px-20 py-2 text-indigo-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
                                     onClick={() => {
                                         props.paginate(-1)
                                     }}
@@ -50,7 +48,7 @@ export const Paginator = (props: PaginatorProps) => {
                                     Previous
                                 </button>
                                 <button
-                                    className="h-10 w-1/2 px-5 m-2 text-indigo-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
+                                    className="max-w-min px-20 py-2 text-indigo-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
                                     onClick={() => {
                                         props.paginate(1)
                                     }}
@@ -58,25 +56,21 @@ export const Paginator = (props: PaginatorProps) => {
                                     Next
                                 </button>
                             </>
-                        ) : (
-                            ''
-                        )}
+                        ) : null}
 
                         {props.page === maxPage ? (
                             <button
-                                className="h-10 w-1/2 px-5 m-2 text-indigo-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
+                                className="max-w-min px-20 py-2 text-indigo-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
                                 onClick={() => {
                                     props.paginate(-1)
                                 }}
                             >
                                 Previous
                             </button>
-                        ) : (
-                            ''
-                        )}
+                        ) : null}
                     </div>
                 </>
             ) : null}
-        </>
+        </div>
     )
 }
