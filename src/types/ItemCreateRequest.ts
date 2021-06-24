@@ -4,4 +4,5 @@ export type ItemCreateRequest = {
     content: string
     typeId: string
     mainImage: File
+    mainImageURL: string
 }

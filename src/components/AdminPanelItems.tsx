@@ -18,6 +18,9 @@ import { TextInput } from './TextInput'
 import { Modal } from '@/components/Modal'
 import { ConfirmModal } from './ConfirmModal'
 import Loader from 'react-loader-spinner'
+
+
+
 const ModalComponent = dynamic(() => import('@/components/Modal').then((mod) => mod.Modal), {
     ssr: false,
 }) as typeof Modal

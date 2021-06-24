@@ -5,6 +5,7 @@ type TextInputProps<T extends {}> = {
     name: string
     placeholder?: string
     value?: string
+    listener?: (value: string) => void
     className?: string
     data?: T
     onChange?: (newValue: string, data: T) => void
@@ -28,6 +29,14 @@ export const TextInput = React.forwardRef(<T extends {}>(props: TextInputProps<T
         if (event.key === 'Enter') {
             element.current.blur()
         }
+        
+    }
+
+    const handleChange = (event: React.FormEvent<HTMLInputElement>) => {
+        
+        if (props.listener) {
+            props.listener(event.currentTarget.value)
+        }
     }
 
     return (
@@ -45,6 +54,7 @@ export const TextInput = React.forwardRef(<T extends {}>(props: TextInputProps<T
             placeholder={props.placeholder ?? ''}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
+            onChange={handleChange}
             className={baseClass + props.className ?? ''}
             id={nanoid()}
             defaultValue={props.value}
