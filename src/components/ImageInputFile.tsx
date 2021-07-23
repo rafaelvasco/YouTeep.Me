@@ -57,7 +57,7 @@ export const ImageInputFile = React.forwardRef((props: ImageInputFileProps, ref)
                         className="lg:max-h-32 md:max-h-16 object-cover object-center bg-white"
                     />
                 ) : (
-                    <span>Select Image</span>
+                    <span>Upload...</span>
                 )}
             </div>
         </>
