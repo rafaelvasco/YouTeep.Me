@@ -1,17 +1,26 @@
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useFetch } from '@/backend/requestHooks'
 import { useForm } from 'react-hook-form'
 
 import toast from 'react-hot-toast'
 import { useBus } from 'react-bus'
 import { AuthContext } from '@/contexts/authContext'
-import { createItem } from '@/backend/itemService'
-import { ComponentEvents } from './events'
 import { ItemType } from '@/types/ItemType'
 import { Select } from './Select'
 import { TextInput } from './TextInput'
-import { ImageInputFile } from './ImageInputFile'
 import { ImageScraper } from './ImageScraper'
+import extApi from '@/backend/extApi'
+import { createItem } from '@/backend/itemService'
+import { ComponentEvents } from './events'
+import { ImageInputFile } from './ImageInputFile'
+import { getUrlFileExtension } from '@/lib/utils'
+
+type Inputs = {
+    itemName: string
+    itemImage: File
+    itemType: string
+    selectedImageURL: string
+}
 
 export const ItemCreator = () => {
     const [itemTypes, itemTypesFetchError] = useFetch<ItemType[]>('item/types')
@@ -21,25 +30,34 @@ export const ItemCreator = () => {
     const [expanded, setExpanded] = useState(false)
 
     const {
-        register,
         handleSubmit,
         reset,
-        errors,
-        formState: { isSubmitSuccessful, isSubmitting },
-    } = useForm()
+        control,
+        formState: { errors, isSubmitting },
+    } = useForm<Inputs>()
 
-    const imageUploadRef = useRef(null)
+    //const imageUploadRef = useRef(null)
 
     const eventBus = useBus()
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (data: Inputs) => {
+        let itemImageFile: File
+
+        if (data.selectedImageURL) {
+            itemImageFile = await buildImageFileFromUrl(data.selectedImageURL)
+        } else if (data.itemImage) {
+            itemImageFile = data.itemImage
+        } else {
+            toast.error('Item Image is Empty!')
+            return
+        }
+
         const result = await createItem({
-            name: data.name,
+            name: data.itemName,
             userId: userInfo.id,
-            typeId: data.itemType ?? '60566a5cf632eba782e13a37',
-            content: data.content || '',
-            mainImage: data.mainImage[0] ?? null,
-            mainImageURL: data.mainImageURL ?? null
+            typeId: data.itemType,
+            content: '',
+            mainImage: itemImageFile,
         })
 
         if (result) {
@@ -51,14 +69,19 @@ export const ItemCreator = () => {
         }
     }
 
+    const buildImageFileFromUrl = async (url: string): Promise<File> => {
+        const result = await extApi.get<Blob>(url, {
+            responseType: 'blob',
+        })
+        const type = getUrlFileExtension(url)
+        const fileName = url.substring(url.lastIndexOf('/') + 1)
+        return new File([result.data], fileName, { type: type })
+    }
+
     const resetForm = () => {
         reset()
         // tslint:disable-next-line
-        imageUploadRef.current?.clear()
-    }
-
-    const formOptions = {
-        name: { required: 'Name field is required' },
+        //imageUploadRef.current?.clear()
     }
 
     useEffect(() => {
@@ -81,37 +104,50 @@ export const ItemCreator = () => {
                                 className="grid p-5 grid-cols-1 gap-6"
                                 onSubmit={handleSubmit(onSubmit)}
                             >
-                                {userInfo.role === 'ADMIN' ? (
-                                    <label className="block">
-                                        <span className="text-gray-700 dark:text-gray-200">Image:</span>
-                                        <ImageInputFile
-                                            name="mainImage"
-                                            formRef={register}
-                                            ref={imageUploadRef}
-                                        />
-                                    </label>
-
-                                ) : null}
-
                                 <label className="block">
                                     <span className="text-gray-700 dark:text-gray-200">Name:</span>
+
                                     <TextInput
-                                        ref={register(formOptions.name)}
-                                        name="name"
+                                        name="itemName"
                                         className="mt-1 w-full"
+                                        formControl={control}
+                                        required={true}
                                     />
                                     <small className="text-red-500">
-                                        {errors.name && errors.name.message}
+                                        {errors.itemName && (
+                                            <span>Please give the Item a Name.</span>
+                                        )}
                                     </small>
                                 </label>
+
+                                {userInfo.role === 'ADMIN' ? (
+                                    <>
+                                        <label className="block">
+                                            <span className="text-gray-700 dark:text-gray-200">
+                                                Image:
+                                            </span>
+                                            <ImageInputFile
+                                                name="itemImage"
+                                                formControl={control}
+                                                required={false}
+                                            />
+                                        </label>
+                                        <small className="text-red-500">
+                                            {errors.itemImage && (
+                                                <span>Please upload an Image for the Item</span>
+                                            )}
+                                        </small>
+                                    </>
+                                ) : null}
 
                                 <label className="block">
                                     <span className="text-gray-700 dark:text-gray-200">Type:</span>
                                     {itemTypes ? (
                                         <Select
+                                            formControl={control}
+                                            required={true}
                                             name="itemType"
                                             className="ml-4"
-                                            ref={register}
                                             options={itemTypes.map((type) => {
                                                 return {
                                                     label: type.name.toUpperCase(),
@@ -121,9 +157,16 @@ export const ItemCreator = () => {
                                         />
                                     ) : null}
                                 </label>
-
-
-
+                                <ImageScraper
+                                    name="selectedImageURL"
+                                    formControl={control}
+                                    required={true}
+                                />
+                                <small className="text-red-500">
+                                    {errors.selectedImageURL && (
+                                        <span>Please search and select an Image for the Item.</span>
+                                    )}
+                                </small>
                                 <button
                                     disabled={isSubmitting}
                                     className="h-10 px-5 m-2 text-white transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
@@ -132,18 +175,17 @@ export const ItemCreator = () => {
                                     {!isSubmitting ? 'Create' : 'Please Wait'}
                                 </button>
                             </form>
-                            <ImageScraper />
                         </>
-
                     ) : null}
 
                     <div className="flex justify-center align-middle">
                         <button
                             onClick={handleToggleExpandedClick}
-                            className={`h-10 px-5 w-full outline-none focus:outline-none transition-colors duration-150 ${!expanded
+                            className={`h-10 px-5 w-full outline-none focus:outline-none transition-colors duration-150 ${
+                                !expanded
                                     ? 'bg-blue-700 hover:bg-blue-800 dark:text-gray-100 text-white'
                                     : 'dark:bg-gray-800 dark:hover:bg-gray-900 bg-gray-100 hover:bg-gray-200 text-gray-400'
-                                } rounded-lg focus:shadow-outline`}
+                            } rounded-lg focus:shadow-outline`}
                         >
                             {!expanded ? 'Create Item...' : 'Collapse'}
                         </button>

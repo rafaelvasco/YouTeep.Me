@@ -4,7 +4,6 @@ export enum ComponentEvents {
     ItemListPaginationChanged = 'ItemListPaginationChanged',
     ItemListModified = 'itemListModified',
     ItemDeleteConfirmed = 'itemDeleteConfirmed',
-    ItemViewTriggered = 'itemViewTriggered',
     AdminModeTriggered = 'adminModeTriggered',
     AdminSectionSelected = 'adminSectionSelected',
     AdminItemPanelItemEditSelected = 'adminItemPanelItemEditSelected',

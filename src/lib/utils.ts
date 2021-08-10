@@ -18,3 +18,29 @@ export const buildQueryUrl = (filter: ItemFilter, path = '/') => {
     const query = qs.stringify(filter, { skipNull: true })
     return path + '?' + query
 }
+
+export const getUrlFileExtension = (url: string): string => {
+    const patternFileExtension = /\.([0-9a-z]+)(?:[\?#]|$)/i
+
+    //Get the file Extension
+    var match = url.match(patternFileExtension)
+
+    if (match) {
+        const ext = match[0].slice(1)
+        switch (ext) {
+            case 'jpg':
+            case 'jpeg':
+                return 'image/jpeg'
+            case 'png':
+                return 'image/png'
+            case 'webp':
+                return 'image/webp'
+            case 'gif':
+                return 'image/gif'
+            case 'bmp':
+                return 'image/bmp'
+            default:
+                return 'image/'
+        }
+    }
+}

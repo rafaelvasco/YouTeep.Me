@@ -4,9 +4,8 @@ import { ItemFilter, itemFilterEmpty } from '@/types/ItemFilter'
 import { useRouter } from 'next/dist/client/router'
 import { useBus, useListener } from 'react-bus'
 import { buildQueryUrl } from '@/lib/utils'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PageSize } from '@/data/config'
-import { AuthContext } from '@/contexts/authContext'
 import { deleteItem } from '@/backend/itemService'
 import toast from 'react-hot-toast'
 import { ComponentEvents } from '@/components/events'
@@ -14,25 +13,13 @@ import { FilterPanel } from '@/components/FilterPanel'
 import { AdminPanel } from '@/components/AdminPanel'
 import { MainItemList } from '@/components/MainItemList'
 import { SectionContainer } from '@/components/SectionContainer'
-import dynamic from 'next/dynamic'
-import { Modal } from '@/components/Modal'
-import { Item } from '@/types/Item'
-import { ItemViewModal } from '@/components/ItemViewModal'
 import { ItemCreator } from '@/components/ItemCreator'
 import { useAppContext } from '@/contexts/appContext'
-
-const ModalComponent = dynamic(() => import('@/components/Modal').then((mod) => mod.Modal), {
-    ssr: false,
-}) as typeof Modal
 
 const Home = () => {
     const appState = useAppContext()
 
     const [loaded, setLoaded] = useState(false)
-
-    const [visualizedItem, setVisualizedItem] = useState<Item>(null)
-
-    const [itemModalOpen, setItemModalOpen] = useState(false)
 
     const router = useRouter()
 
@@ -69,11 +56,6 @@ const Home = () => {
         }
     })
 
-    useListener(ComponentEvents.ItemViewTriggered, (item: Item) => {
-        setItemModalOpen(true)
-        setVisualizedItem(item)
-    })
-
     return (
         <>
             <PageSeo
@@ -81,12 +63,6 @@ const Home = () => {
                 description={siteMetadata.description}
                 url={siteMetadata.siteUrl}
             />
-
-            {itemModalOpen && visualizedItem ? (
-                <ModalComponent setOpen={setItemModalOpen}>
-                    <ItemViewModal item={visualizedItem} />
-                </ModalComponent>
-            ) : null}
 
             <div className="my-5">
                 {!appState.getAdminActive() ? (

@@ -5,30 +5,32 @@ import { AuthContext } from '@/contexts/authContext'
 import siteMetadata from '@/data/siteMetadata.json'
 import { LoginRequest } from '@/types/LoginRequest'
 import { useRouter } from 'next/router'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { useForm } from 'react-hook-form'
 
 type Props = {
     redirectToHome: boolean
 }
 
+type Inputs = {
+    email: string
+    password: string
+}
+
 const Login = ({ redirectToHome = true }: Props) => {
     const { storeAuth, loggedIn } = useContext(AuthContext)
-
-    useEffect(() => {}, [])
 
     const {
         register,
         handleSubmit,
         reset,
-        errors,
         setValue,
-        formState: { isSubmitSuccessful, isSubmitting },
-    } = useForm()
+        formState: { errors, isSubmitting },
+    } = useForm<Inputs>()
 
     const router = useRouter()
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (data: Inputs) => {
         const user = await login(data as LoginRequest)
 
         if (user) {
@@ -69,13 +71,13 @@ const Login = ({ redirectToHome = true }: Props) => {
                                 <input
                                     id="email"
                                     autoComplete="off"
-                                    ref={register(formOptions.email)}
+                                    {...register('email', { required: true })}
                                     className="bg-white dark:bg-gray-900 mt-1 block w-full rounded-md border-gray-200 dark:border-gray-800 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                                     name="email"
                                     type="text"
                                 />
                                 <small className="text-red-500">
-                                    {errors.email && errors.email.message}
+                                    {errors.email && formOptions.email.required}
                                 </small>
                             </label>
 
@@ -84,13 +86,13 @@ const Login = ({ redirectToHome = true }: Props) => {
                                 <input
                                     id="password"
                                     autoComplete="off"
-                                    ref={register(formOptions.password)}
+                                    {...register('password', { required: true })}
                                     className="bg-white dark:bg-gray-900 mt-1 block w-full rounded-md border-gray-200 dark:border-gray-800 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                                     name="password"
                                     type="password"
                                 />
                                 <small className="text-red-500">
-                                    {errors.password && errors.password.message}
+                                    {errors.password && formOptions.password.required}
                                 </small>
                             </label>
 
@@ -109,7 +111,7 @@ const Login = ({ redirectToHome = true }: Props) => {
                             target="_blank"
                             className="inline-flex items-center text-xs font-thin text-center text-gray-500 hover:text-gray-700 dark:text-gray-100 dark:hover:text-white"
                         >
-                            <span className="ml-2">You don&#x27;t have an account?</span>
+                            <span className="ml-2">You don't have an account?</span>
                         </a>
                     </div>
                 </div>

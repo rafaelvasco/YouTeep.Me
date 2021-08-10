@@ -1,4 +1,7 @@
+import { fi } from 'date-fns/locale'
 import React, { Ref, useState } from 'react'
+import { useEffect } from 'react'
+import { Control, Controller } from 'react-hook-form'
 
 type SelectOption<T> = {
     label: string
@@ -11,8 +14,10 @@ type SelectProps<T> = {
     options: SelectOption<T>[]
     className?: string
     data?: any
+    required?: boolean
     value?: T
     onChange?: (newValue: T | null, data: any) => void
+    formControl?: Control<any>
 }
 
 export const Select = React.forwardRef(
@@ -24,30 +29,74 @@ export const Select = React.forwardRef(
 
         return (
             <>
-                <select
-                    name={props.name}
-                    ref={ref}
-                    className={baseClass + props.className ?? ''}
-                    value={value}
-                    onChange={(evt) => {
-                        if (evt.target.value) {
-                            const value = evt.target.value as T
-                            setValue(value)
-                            props.onChange?.(value, props.data ?? null)
-                        } else {
-                            setValue(null)
-                            props.onChange?.(null, props.data ?? null)
-                        }
-                    }}
-                >
-                    {props.options.map((option) => {
-                        return (
-                            <option key={option.label} value={option.value}>
-                                {option.label}
-                            </option>
-                        )
-                    })}
-                </select>
+                {props.formControl ? (
+                    <Controller
+                        name={props.name}
+                        control={props.formControl}
+                        rules={{
+                            required:
+                                typeof props.required !== 'undefined' ? props.required : false,
+                        }}
+                        render={({ field }) => {
+                            if (!field.value) {
+                                field.onChange(value)
+                            }
+                            return (
+                                <select
+                                    name={props.name}
+                                    ref={ref}
+                                    className={baseClass + props.className ?? ''}
+                                    value={value}
+                                    onChange={(evt) => {
+                                        if (evt.target.value) {
+                                            const value = evt.target.value as T
+                                            setValue(value)
+                                            props.onChange?.(value, props.data ?? null)
+                                            field.onChange(value)
+                                        } else {
+                                            setValue(null)
+                                            props.onChange?.(null, props.data ?? null)
+                                            field.onChange(null)
+                                        }
+                                    }}
+                                >
+                                    {props.options.map((option) => {
+                                        return (
+                                            <option key={option.label} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        )
+                                    })}
+                                </select>
+                            )
+                        }}
+                    />
+                ) : (
+                    <select
+                        name={props.name}
+                        ref={ref}
+                        className={baseClass + props.className ?? ''}
+                        value={value}
+                        onChange={(evt) => {
+                            if (evt.target.value) {
+                                const value = evt.target.value as T
+                                setValue(value)
+                                props.onChange?.(value, props.data ?? null)
+                            } else {
+                                setValue(null)
+                                props.onChange?.(null, props.data ?? null)
+                            }
+                        }}
+                    >
+                        {props.options.map((option) => {
+                            return (
+                                <option key={option.label} value={option.value}>
+                                    {option.label}
+                                </option>
+                            )
+                        })}
+                    </select>
+                )}
             </>
         )
     }

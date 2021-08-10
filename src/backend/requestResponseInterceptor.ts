@@ -8,7 +8,7 @@ import axios from 'axios'
 import { refreshAuthorize } from './authService'
 
 export const RequestResponseInterceptor = ({ children }) => {
-    const { storeAuth, clearAuth } = useContext(AuthContext)
+    const { storeAuth, clearAuth, loggedIn } = useContext(AuthContext)
 
     const router = useRouter()
 
@@ -43,11 +43,17 @@ export const RequestResponseInterceptor = ({ children }) => {
                             }
                         })
                         .catch((error) => {
-                            console.log("Couldn't refresh")
                             NProgress.done()
-                            clearAuth()
+
+                            if (loggedIn) {
+                                clearAuth()
+                                toast.error('Your login expired, please login again.')
+                            } else {
+                                toast.error('Access denied. Please Login.')
+                            }
+
                             router.push('/login')
-                            toast.error('Your login expired, please login again.')
+
                             return Promise.reject(error)
                         })
                 } else {

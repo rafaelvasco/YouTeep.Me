@@ -1,63 +1,80 @@
-import { nanoid } from 'nanoid'
-import React, { useRef, useState } from 'react'
+import React, { Ref } from 'react'
+import { useState } from 'react'
+import { Control, Controller } from 'react-hook-form'
 
-type TextInputProps<T extends {}> = {
+type InputElement = HTMLInputElement | HTMLTextAreaElement
+type InputChangeEvent = React.ChangeEvent<InputElement>
+
+interface TextInputProps<T> {
+    value?: string
+    onChange?: (val: string, data: any) => void
     name: string
     placeholder?: string
-    value?: string
-    listener?: (value: string) => void
+    autoFocus?: boolean
+    type?: 'email' | 'password' | 'text'
+    textarea?: boolean
     className?: string
-    data?: T
-    onChange?: (newValue: string, data: T) => void
+    visible?: boolean
+    data?: any
+    required?: boolean
+    formControl?: Control<any>
 }
 
-export const TextInput = React.forwardRef(<T extends {}>(props: TextInputProps<T>, ref?) => {
-    const element = useRef(null)
-    const [value, setValue] = useState(props.value)
+export const TextInput = React.forwardRef(
+    <T extends any>(
+        {
+            onChange,
+            textarea = false,
+            className,
+            required = false,
+            value,
+            visible = true,
+            name,
+            formControl,
+            data = null,
+            ...rest
+        }: TextInputProps<T>,
+        ref?: Ref<any>
+    ) => {
+        const [val, setVal] = useState(value ?? '')
 
-    const baseClass =
-        'bg-gray-200 dark:bg-gray-900 mt-1 block w-full rounded-md border-none shadow-inner focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 '
-
-    const handleBlur = () => {
-        if (element.current.value !== value) {
-            props.onChange?.(element.current.value, props.data ?? null)
-            setValue(element.current.value)
-        }
+        const InputElement = textarea ? 'textarea' : 'input'
+        const baseClass =
+            'bg-gray-200 dark:bg-gray-900 mt-1 px-5 py-3 w-full rounded-md border-none shadow-inner focus:outline-none focus:ring focus:ring-blue-500 focus:ring-opacity-50 '
+        return (
+            <>
+                {formControl ? (
+                    <Controller
+                        name={name}
+                        control={formControl}
+                        rules={{ required }}
+                        render={({ field }) => (
+                            <InputElement
+                                value={val}
+                                ref={ref}
+                                className={baseClass + (className ?? (!visible ? 'hidden' : ''))}
+                                onChange={({ target: { value } }: InputChangeEvent) => {
+                                    onChange?.(value, data)
+                                    setVal(value)
+                                    field.onChange(value)
+                                }}
+                                {...rest}
+                            />
+                        )}
+                    />
+                ) : (
+                    <InputElement
+                        value={val}
+                        ref={ref}
+                        className={baseClass + (className ?? '')}
+                        onChange={({ target: { value } }: InputChangeEvent) => {
+                            onChange?.(value, data)
+                            setVal(value)
+                        }}
+                        {...rest}
+                    />
+                )}
+            </>
+        )
     }
-
-    const handleKeyDown = (event: React.KeyboardEvent) => {
-        if (event.key === 'Enter') {
-            element.current.blur()
-        }
-        
-    }
-
-    const handleChange = (event: React.FormEvent<HTMLInputElement>) => {
-        
-        if (props.listener) {
-            props.listener(event.currentTarget.value)
-        }
-    }
-
-    return (
-        <input
-            name={props.name}
-            ref={(el) => {
-                if (typeof ref === 'function') {
-                    ref(el)
-                } else if (ref) {
-                    ref.current = el
-                }
-                element.current = el
-            }}
-            type="text"
-            placeholder={props.placeholder ?? ''}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            onChange={handleChange}
-            className={baseClass + props.className ?? ''}
-            id={nanoid()}
-            defaultValue={props.value}
-        />
-    )
-})
+)
