@@ -5,7 +5,7 @@ import NProgress from 'nprogress'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-import { refreshAuthorize } from './authService'
+import { AuthService } from './authService'
 
 export const RequestResponseInterceptor = ({ children }) => {
     const { storeAuth, clearAuth, loggedIn } = useContext(AuthContext)
@@ -34,7 +34,7 @@ export const RequestResponseInterceptor = ({ children }) => {
             async (error) => {
                 if (error.response.status === 401 && error.config) {
                     console.log('Trying to refresh Authorize')
-                    return refreshAuthorize()
+                    return AuthService.refreshAuthorize()
                         .then((user) => {
                             if (user) {
                                 console.log(`Authorization Refreshed: ${JSON.stringify(user)}`)

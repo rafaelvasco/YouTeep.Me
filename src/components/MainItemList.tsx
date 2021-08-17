@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useListener } from 'react-bus'
-import { ComponentEvents } from './events'
 import { Paginator } from './Paginator'
 import { ItemCard } from './ItemCard'
 import { useAppContext } from '@/contexts/appContext'
@@ -12,6 +10,10 @@ export const MainItemList = () => {
     const [page, setPage] = useState(appState.getMainFilter().page)
 
     useEffect(() => {
+        appState.queryItems()
+    }, [])
+
+    useEffect(() => {
         setPage(appState.getMainFilter().page)
     }, [appState.getMainFilter().page])
 
@@ -20,10 +22,6 @@ export const MainItemList = () => {
             appState.setMainFilterPage(page)
         }
     }, [page])
-
-    useListener(ComponentEvents.ItemListModified, () => {
-        appState.mutateMainItemList()
-    })
 
     return (
         <>

@@ -2,28 +2,26 @@ import { PageSeo } from '@/components/SEO'
 import siteMetadata from '@/data/siteMetadata.json'
 import { ItemFilter, itemFilterEmpty } from '@/types/ItemFilter'
 import { useRouter } from 'next/dist/client/router'
-import { useBus, useListener } from 'react-bus'
 import { buildQueryUrl } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { PageSize } from '@/data/config'
-import { deleteItem } from '@/backend/itemService'
-import toast from 'react-hot-toast'
-import { ComponentEvents } from '@/components/events'
 import { FilterPanel } from '@/components/FilterPanel'
 import { AdminPanel } from '@/components/AdminPanel'
 import { MainItemList } from '@/components/MainItemList'
 import { SectionContainer } from '@/components/SectionContainer'
 import { ItemCreator } from '@/components/ItemCreator'
 import { useAppContext } from '@/contexts/appContext'
+import { useContext } from 'react'
+import { AuthContext } from '@/contexts/authContext'
 
 const Home = () => {
     const appState = useAppContext()
 
+    const { loggedIn } = useContext(AuthContext)
+
     const [loaded, setLoaded] = useState(false)
 
     const router = useRouter()
-
-    const eventBus = useBus()
 
     const updateQueryParams = (itemFilter: ItemFilter) => {
         console.log('Update Query Params')
@@ -47,15 +45,6 @@ const Home = () => {
         updateQueryParams(appState.getMainFilter())
     }, [appState.getMainFilter()])
 
-    useListener(ComponentEvents.ItemDeleteConfirmed, async (itemId: string) => {
-        console.log('Item delete confirmed')
-        const result = await deleteItem(itemId)
-        if (result) {
-            eventBus.emit(ComponentEvents.ItemListModified)
-            toast.success(`Item Removed Successfully!`)
-        }
-    })
-
     return (
         <>
             <PageSeo
@@ -69,7 +58,7 @@ const Home = () => {
                     <>
                         <SectionContainer>
                             <FilterPanel />
-                            <ItemCreator />
+                            {loggedIn ? <ItemCreator /> : null}
                             <MainItemList />
                         </SectionContainer>
                     </>

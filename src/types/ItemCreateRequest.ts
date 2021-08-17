@@ -3,5 +3,6 @@ export type ItemCreateRequest = {
     name: string
     content: string
     typeId: string
-    mainImage: File
+    mainImage?: File
+    mainImageUrl?: string
 }

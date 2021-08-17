@@ -1,4 +1,4 @@
-import { logout, refreshAuthorize } from '@/backend/authService'
+import { AuthService } from '@/backend/authService'
 import { User } from '@/types/User'
 import { UserRole } from '@/types/UserRole'
 import { createContext, useEffect, useState } from 'react'
@@ -38,7 +38,7 @@ export const AuthContainer = ({ children }) => {
     }
 
     const clearAuth = async () => {
-        const result = await logout()
+        const result = await AuthService.logout()
 
         if (result) {
             setLoggedIn(false)
@@ -50,7 +50,7 @@ export const AuthContainer = ({ children }) => {
 
     const tryAuthorize = async (): Promise<User | null> => {
         try {
-            const user = await refreshAuthorize()
+            const user = await AuthService.refreshAuthorize()
 
             if (user) {
                 console.log('Logged in using Refresh Token')

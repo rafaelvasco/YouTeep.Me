@@ -3,17 +3,16 @@ import { useFetch } from '@/backend/requestHooks'
 import { useForm } from 'react-hook-form'
 
 import toast from 'react-hot-toast'
-import { useBus } from 'react-bus'
 import { AuthContext } from '@/contexts/authContext'
 import { ItemType } from '@/types/ItemType'
 import { Select } from './Select'
 import { TextInput } from './TextInput'
 import { ImageScraper } from './ImageScraper'
 import extApi from '@/backend/extApi'
-import { createItem } from '@/backend/itemService'
-import { ComponentEvents } from './events'
 import { ImageInputFile } from './ImageInputFile'
 import { getUrlFileExtension } from '@/lib/utils'
+import { useAppContext } from '@/contexts/appContext'
+import { ItemCreateRequest } from '@/types/ItemCreateRequest'
 
 type Inputs = {
     itemName: string
@@ -23,6 +22,8 @@ type Inputs = {
 }
 
 export const ItemCreator = () => {
+    const appContext = useAppContext()
+
     const [itemTypes, itemTypesFetchError] = useFetch<ItemType[]>('item/types')
 
     const { userInfo } = useContext(AuthContext)
@@ -38,44 +39,27 @@ export const ItemCreator = () => {
 
     //const imageUploadRef = useRef(null)
 
-    const eventBus = useBus()
-
     const onSubmit = async (data: Inputs) => {
-        let itemImageFile: File
-
-        if (data.selectedImageURL) {
-            itemImageFile = await buildImageFileFromUrl(data.selectedImageURL)
-        } else if (data.itemImage) {
-            itemImageFile = data.itemImage
-        } else {
-            toast.error('Item Image is Empty!')
-            return
-        }
-
-        const result = await createItem({
+        let requestBody = {
             name: data.itemName,
             userId: userInfo.id,
             typeId: data.itemType,
             content: '',
-            mainImage: itemImageFile,
-        })
+        } as ItemCreateRequest
 
-        if (result) {
-            toast.success(`Item Created Successfully!`)
-
-            resetForm()
-
-            eventBus.emit(ComponentEvents.ItemListModified)
+        if (data.selectedImageURL) {
+            requestBody.mainImageUrl = data.selectedImageURL
+        } else if (data.itemImage) {
+            requestBody.mainImage = data.itemImage
+        } else {
+            toast.error('Please upload an Image or select one in Image Searcher below!')
+            return
         }
-    }
 
-    const buildImageFileFromUrl = async (url: string): Promise<File> => {
-        const result = await extApi.get<Blob>(url, {
-            responseType: 'blob',
-        })
-        const type = getUrlFileExtension(url)
-        const fileName = url.substring(url.lastIndexOf('/') + 1)
-        return new File([result.data], fileName, { type: type })
+        try {
+            appContext.createItem(requestBody)
+            resetForm()
+        } catch (e) {}
     }
 
     const resetForm = () => {
@@ -140,6 +124,8 @@ export const ItemCreator = () => {
                                     </>
                                 ) : null}
 
+                                <ImageScraper name="selectedImageURL" formControl={control} />
+
                                 <label className="block">
                                     <span className="text-gray-700 dark:text-gray-200">Type:</span>
                                     {itemTypes ? (
@@ -157,11 +143,7 @@ export const ItemCreator = () => {
                                         />
                                     ) : null}
                                 </label>
-                                <ImageScraper
-                                    name="selectedImageURL"
-                                    formControl={control}
-                                    required={true}
-                                />
+
                                 <small className="text-red-500">
                                     {errors.selectedImageURL && (
                                         <span>Please search and select an Image for the Item.</span>

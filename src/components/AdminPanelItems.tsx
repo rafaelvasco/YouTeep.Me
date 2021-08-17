@@ -1,4 +1,3 @@
-import { editItem } from '@/backend/itemService'
 import { useFetch } from '@/backend/requestHooks'
 import { PageSize } from '@/data/config'
 import { Item } from '@/types/Item'
@@ -18,8 +17,8 @@ import { TextInput } from './TextInput'
 import { Modal } from '@/components/Modal'
 import { ConfirmModal } from './ConfirmModal'
 import Loader from 'react-loader-spinner'
-
-
+import { useAppContext } from '@/contexts/appContext'
+import { ItemService } from '@/backend/itemService'
 
 const ModalComponent = dynamic(() => import('@/components/Modal').then((mod) => mod.Modal), {
     ssr: false,
@@ -27,6 +26,8 @@ const ModalComponent = dynamic(() => import('@/components/Modal').then((mod) => 
 
 export const AdminPanelItems = () => {
     const [itemTypes, itemTypesFetchError] = useFetch<ItemType[]>('item/types')
+
+    const appContext = useAppContext()
 
     const eventBus = useBus()
 
@@ -62,7 +63,7 @@ export const AdminPanelItems = () => {
     }, [itemTypesFetchError])
 
     const onItemTypeChanged = async (itemTypeId: string, item: Item) => {
-        await editItem(item.id, { type: itemTypeId })
+        await ItemService.editItem(item.id, { type: itemTypeId })
 
         toast.success('Item Type changed Successfuly')
 
@@ -70,7 +71,7 @@ export const AdminPanelItems = () => {
     }
 
     const onItemNameChanged = async (name: string, item: Item) => {
-        await editItem(item.id, { name })
+        await ItemService.editItem(item.id, { name })
 
         toast.success('Item Named changed Successfuly')
 
@@ -85,85 +86,84 @@ export const AdminPanelItems = () => {
         <>
             {queryResult ? (
                 <div className="flex flex-col w-full">
-                    <div>
-                        <Table
-                            className="w-full table-auto"
-                            properties={{
-                                id: 'Id',
-                                name: 'Name',
-                                type: 'Type',
-                                user: 'User',
-                                createdAt: 'Created',
-                            }}
-                            items={queryResult.items}
-                            customRenderers={{
-                                name: (item) => {
-                                    return (
-                                        <TextInput
-                                            name="itemName"
-                                            className="w-full"
-                                            value={item.name}
-                                            data={item}
-                                            onChange={onItemNameChanged}
-                                        />
-                                    )
-                                },
-                                type: (item) => {
-                                    return (
-                                        <Select
-                                            className="ligh"
-                                            name="itemType"
-                                            data={item}
-                                            value={item.type.id}
-                                            options={itemTypes.map((type) => {
-                                                return {
-                                                    label: type.name.toUpperCase(),
-                                                    value: type.id,
-                                                }
-                                            })}
-                                            onChange={onItemTypeChanged}
-                                        />
-                                    )
-                                },
-                                user: (item) => {
-                                    return <span>{item.user.email}</span>
-                                },
-                                createdAt: (item) => {
-                                    return <DateDisplay dateString={item.createdAt} />
-                                },
-                            }}
-                            actions={[
-                                (it: Item) => {
-                                    return (
-                                        <button
-                                            className="px-5 py-2 bg-blue-500 rounded-lg text-white"
-                                            onClick={() => {
-                                                eventBus.emit(
-                                                    ComponentEvents.AdminItemPanelItemEditSelected,
-                                                    it.id
-                                                )
-                                            }}
-                                        >
-                                            Edit Content
-                                        </button>
-                                    )
-                                },
-                                (it: Item) => {
-                                    return (
-                                        <button
-                                            className="px-5 py-2 bg-blue-500 rounded-lg text-white"
-                                            onClick={() => {
-                                                setDeleteModalOpen(true)
-                                                setItemToDelete(it.id)
-                                            }}
-                                        >
-                                            Delete
-                                        </button>
-                                    )
-                                },
-                            ]}
-                        />
-                    </div>
+                    <Table
+                        className="w-full table-auto"
+                        properties={{
+                            id: 'Id',
+                            name: 'Name',
+                            type: 'Type',
+                            user: 'User',
+                            createdAt: 'Created',
+                        }}
+                        items={queryResult.items}
+                        customRenderers={{
+                            name: (item) => {
+                                return (
+                                    <TextInput
+                                        name="itemName"
+                                        className="w-full"
+                                        value={item.name}
+                                        data={item}
+                                        onChange={onItemNameChanged}
+                                    />
+                                )
+                            },
+                            type: (item) => {
+                                return (
+                                    <Select
+                                        className="ligh"
+                                        name="itemType"
+                                        data={item}
+                                        value={item.type.id}
+                                        options={itemTypes.map((type) => {
+                                            return {
+                                                label: type.name.toUpperCase(),
+                                                value: type.id,
+                                            }
+                                        })}
+                                        onChange={onItemTypeChanged}
+                                    />
+                                )
+                            },
+                            user: (item) => {
+                                return <span>{item.user.email}</span>
+                            },
+                            createdAt: (item) => {
+                                return <DateDisplay dateString={item.createdAt} />
+                            },
+                        }}
+                        actions={[
+                            (it: Item) => {
+                                return (
+                                    <button
+                                        className="px-5 py-2 bg-blue-500 rounded-lg text-white"
+                                        onClick={() => {
+                                            eventBus.emit(
+                                                ComponentEvents.AdminItemPanelItemEditSelected,
+                                                it.id
+                                            )
+                                        }}
+                                    >
+                                        Edit Content
+                                    </button>
+                                )
+                            },
+                            (it: Item) => {
+                                return (
+                                    <button
+                                        className="px-5 py-2 bg-blue-500 rounded-lg text-white"
+                                        onClick={() => {
+                                            setDeleteModalOpen(true)
+                                            setItemToDelete(it.id)
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                )
+                            },
+                        ]}
+                    />
+
                     <div>
                         <Paginator
                             page={page}
@@ -176,7 +176,7 @@ export const AdminPanelItems = () => {
                     {deleteModalOpen ? (
                         <ModalComponent
                             confirm={() => {
-                                eventBus.emit(ComponentEvents.ItemDeleteConfirmed, itemToDelete)
+                                appContext.deleteItem(itemToDelete)
                             }}
                             setOpen={setDeleteModalOpen}
                             confirmLabel="Yes, Remove"

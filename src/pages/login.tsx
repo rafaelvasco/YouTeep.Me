@@ -1,5 +1,4 @@
-import api from '@/backend/api'
-import { login } from '@/backend/authService'
+import { AuthService } from '@/backend/authService'
 import { PageSeo } from '@/components/SEO'
 import { AuthContext } from '@/contexts/authContext'
 import siteMetadata from '@/data/siteMetadata.json'
@@ -31,7 +30,7 @@ const Login = ({ redirectToHome = true }: Props) => {
     const router = useRouter()
 
     const onSubmit = async (data: Inputs) => {
-        const user = await login(data as LoginRequest)
+        const user = await AuthService.login(data as LoginRequest)
 
         if (user) {
             storeAuth(user)

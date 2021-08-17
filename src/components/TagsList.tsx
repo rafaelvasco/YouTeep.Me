@@ -6,8 +6,6 @@ type Props = {
 }
 
 const TagsList = ({ tagList }: Props) => {
-    const msgBus = useBus()
-
     return (
         <>
             <div className="flex flex-row flex-wrap my-3">
@@ -15,9 +13,7 @@ const TagsList = ({ tagList }: Props) => {
                     ? tagList.map((t) => (
                           <div
                               key={t}
-                              onClick={() => {
-                                  msgBus.emit(ComponentEvents.TagSelected, t)
-                              }}
+                              onClick={() => {}}
                               className="cursor-default mx-1 px-2 py-1 text-xs bg-purple-500 rounded-xl text-white"
                           >
                               {t}

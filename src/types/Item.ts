@@ -11,4 +11,5 @@ export type Item = {
     active: boolean
     createdAt: Date
     updatedAt: Date
+    votes: number
 }

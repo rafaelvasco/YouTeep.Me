@@ -1,5 +1,4 @@
 import React from 'react'
-import { scrapeImages } from '@/backend/scraperService'
 import { nanoid } from 'nanoid'
 import { useState } from 'react'
 import Loader from 'react-loader-spinner'
@@ -7,6 +6,8 @@ import { Clickable } from './Clickable'
 import { Image } from './Image'
 import { TextInput } from './TextInput'
 import { Control, Controller } from 'react-hook-form'
+import { ScraperService } from '@/backend/scraperService'
+import toast from 'react-hot-toast'
 
 type ImageScraperProps = {
     name: string
@@ -18,6 +19,8 @@ type ImageScraperProps = {
 export const ImageScraper = (props: ImageScraperProps) => {
     const [imageResultUrls, setImageResultUrls] = useState(null)
 
+    const maxResults = 5
+
     const [queryStr, setQueryStr] = useState(props.query ?? '')
 
     const [loading, setLoading] = useState(false)
@@ -26,8 +29,13 @@ export const ImageScraper = (props: ImageScraperProps) => {
         if (!queryStr) {
             return
         }
-        const imageUrls = await scrapeImages(queryStr, 5)
-        setImageResultUrls(imageUrls)
+        const imageUrls = await ScraperService.scrapeImages(queryStr, maxResults)
+
+        if (imageUrls && imageUrls.length > 0) {
+            setImageResultUrls(imageUrls)
+        } else {
+            toast.error('No results!')
+        }
     }
 
     return (

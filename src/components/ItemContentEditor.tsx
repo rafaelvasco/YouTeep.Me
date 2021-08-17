@@ -1,9 +1,9 @@
 import dynamic from 'next/dynamic'
-import { editItem, getItem } from '@/backend/itemService'
 import { useEffect, useState } from 'react'
 import { Item } from '@/types/Item'
 import MarkdownIt from 'markdown-it'
 import toast from 'react-hot-toast'
+import { ItemService } from '@/backend/itemService'
 
 const MdEditor = dynamic(() => import('react-markdown-editor-lite'), {
     ssr: false,
@@ -27,7 +27,7 @@ export const ItemContentEditor = (props: ItemContentEditorProps) => {
 
     const fetchItem = async (id: string) => {
         if (id) {
-            const item = await getItem(id)
+            const item = await ItemService.getItem(id)
 
             if (item.content && item.content.length > 0) {
                 setEditedContent(item.content)
@@ -44,7 +44,7 @@ export const ItemContentEditor = (props: ItemContentEditorProps) => {
     }
 
     const handleSave = async () => {
-        await editItem(editedItem.id, { content: editedContent })
+        await ItemService.editItem(editedItem.id, { content: editedContent })
 
         toast.success('Item Content Edited Successfuly.')
     }
