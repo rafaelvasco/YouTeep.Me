@@ -1,4 +1,7 @@
 module.exports = {
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
     images: {
         domains: [
             'ytmbucket.s3.amazonaws.com',
