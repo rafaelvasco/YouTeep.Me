@@ -2,10 +2,13 @@
     "name": "youteepme",
     "version": "0.2.0",
     "private": true,
+    "engines": {
+        "node": "14.x"
+    },
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-        "start": "next start",
+        "start": "next start -p $PORT",
         "debug": "cross-env NODE_OPTIONS='--inspect' next dev"
     },
     "dependencies": {
