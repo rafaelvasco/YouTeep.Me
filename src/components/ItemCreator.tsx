@@ -80,7 +80,7 @@ export const ItemCreator = () => {
 
     return (
         <>
-            <div className="w-full my-5 mx-auto rounded-xl h-1/2 bg-gray-100 dark:bg-gray-800 shadow-lg p-5 text-gray-800 dark:text-gray-100 relative overflow-hidden min-w-80 max-w-3xl transition-colors">
+            <div className="w-full my-5 mx-auto rounded-xl h-1/2 bg-gray-100 dark:bg-gray-800 shadow-lg p-5 text-gray-800 dark:text-gray-100 relative overflow-hidden min-w-80 max-w-3xl">
                 <div className="relative mt-1">
                     {expanded ? (
                         <>
@@ -151,7 +151,7 @@ export const ItemCreator = () => {
                                 </small>
                                 <button
                                     disabled={isSubmitting}
-                                    className="h-10 px-5 m-2 text-white transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
+                                    className="h-10 px-5 m-2 text-white bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
                                     type="submit"
                                 >
                                     {!isSubmitting ? 'Create' : 'Please Wait'}
@@ -163,7 +163,7 @@ export const ItemCreator = () => {
                     <div className="flex justify-center align-middle">
                         <button
                             onClick={handleToggleExpandedClick}
-                            className={`h-10 px-5 w-full outline-none focus:outline-none transition-colors duration-150 ${
+                            className={`h-10 px-5 w-full outline-none focus:outline-none ${
                                 !expanded
                                     ? 'bg-blue-700 hover:bg-blue-800 dark:text-gray-100 text-white'
                                     : 'dark:bg-gray-800 dark:hover:bg-gray-900 bg-gray-100 hover:bg-gray-200 text-gray-400'

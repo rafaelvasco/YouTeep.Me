@@ -97,7 +97,7 @@ const Login = ({ redirectToHome = true }: Props) => {
 
                             <button
                                 disabled={isSubmitting}
-                                className="h-10 px-5 m-2 text-indigo-100 transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
+                                className="h-10 px-5 m-2 text-indigo-100 bg-blue-700 rounded-lg focus:shadow-outline hover:bg-blue-800"
                                 type="submit"
                             >
                                 {!isSubmitting ? 'Login' : 'Please Wait'}

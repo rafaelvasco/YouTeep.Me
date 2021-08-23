@@ -8,7 +8,8 @@ import Image from 'next/image'
 import api from '@/backend/api'
 import { Item } from '@/types/Item'
 import toast from 'react-hot-toast'
-import { SectionContainer } from '@/components/SectionContainer'
+import { LinkEx } from '@/components/Link'
+import { IoMdArrowRoundBack } from 'react-icons/io'
 
 const mdParser = new MarkdownIt()
 
@@ -58,6 +59,14 @@ const ItemDetail = () => {
                 {item ? (
                     <div className="max-w-5xl w-full my-5 mx-auto">
                         <div className="grid grid-cols-1 gap-10">
+                            <div className="w-32">
+                                <LinkEx href="/" aria-label="GoBack">
+                                    <div className="flex rounded-md dark:bg-gray-100 bg-gray-800 p-2 px-4  dark:hover:bg-blue-400 hover:bg-blue-400 dark:text-gray-800 text-gray-100 dark:hover:text-gray-100  ">
+                                        <IoMdArrowRoundBack size={24} className="inline-flex" />
+                                        <div className="inline-flex">Go Back</div>
+                                    </div>
+                                </LinkEx>
+                            </div>
                             <Image
                                 alt={item.name}
                                 src={item.mainImage ?? '/static/images/time-machine.jpg'}

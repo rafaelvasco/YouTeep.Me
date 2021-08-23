@@ -17,7 +17,7 @@ export const ItemCard = (props: Props) => {
 
     return (
         <div className="relative p-4 md:w-1/2 md" style={{ maxWidth: '544px' }}>
-            <div className="h-full border-2 border-gray-200 bg-gray-100 border-opacity-60 dark:border-gray-800 dark:bg-gray-800 rounded-md overflow-hidden transition-colors">
+            <div className="h-full border-2 border-gray-200 bg-gray-100 border-opacity-60 dark:border-gray-800 dark:bg-gray-800 rounded-md overflow-hidden">
                 <Link href={link}>
                     <a>
                         <Image

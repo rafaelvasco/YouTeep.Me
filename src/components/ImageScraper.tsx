@@ -56,7 +56,7 @@ export const ImageScraper = (props: ImageScraperProps) => {
                         <button
                             type="button"
                             disabled={!queryStr}
-                            className="h-10 px-5 m-2 disabled:opacity-30 disabled:cursor-not-allowed text-white transition-colors duration-150 bg-blue-700 rounded-lg focus:shadow-outline -disabled:hover:bg-blue-800"
+                            className="h-10 px-5 m-2 disabled:opacity-30 disabled:cursor-not-allowed text-white bg-blue-700 rounded-lg focus:shadow-outline -disabled:hover:bg-blue-800"
                             onClick={async () => {
                                 setLoading(true)
                                 await scrape()

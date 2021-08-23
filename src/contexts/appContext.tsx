@@ -22,8 +22,6 @@ export interface AppStateData {
 
     queryItems: () => void
 
-    fetchTypes: () => void
-
     createItem: (request: ItemCreateRequest) => void
 
     addTag: (tag: string) => void
@@ -63,12 +61,9 @@ export function AppStateContainer({ children }) {
 
     const [availableTags, setAvailableTags] = useState([])
 
-    //const [availableTypes, itemTypesFetchError] = useFetch<ItemType[]>('item/types')
-
-    // const [mainItemList, errorMainItemList, mutateMainItemList] = useFetch<ItemQueryResult>(
-    //     'item/query',
-    //     itemsFilter
-    // )
+    useEffect(() => {
+        fetchTypes()
+    }, [])
 
     /* ===== ITEM ================================================  */
     /* ============================================================ */
@@ -86,7 +81,6 @@ export function AppStateContainer({ children }) {
 
         if (result) {
             toast.success(`Item Created Successfully!`)
-            //mutateMainItemList()
             await queryItems()
         }
     }
@@ -94,10 +88,9 @@ export function AppStateContainer({ children }) {
     const voteItem = async (itemId: string) => {
         const itemDb = await ItemService.getItem(itemId)
 
-        const result = await ItemService.editItem(itemId, { votes: itemDb.votes + 1 })
+        const result = await ItemService.voteItem(itemId, itemDb.votes + 1)
 
         if (result) {
-            //mutateMainItemList()
             await queryItems()
         }
         eventBus.emit(ComponentEvents.ItemListModified)
@@ -107,7 +100,6 @@ export function AppStateContainer({ children }) {
         const result = await ItemService.deleteItem(itemId)
 
         if (result) {
-            //mutateMainItemList()
             await queryItems()
             toast.success(`Item Removed Successfully!`)
             eventBus.emit(ComponentEvents.ItemListModified)
@@ -189,18 +181,6 @@ export function AppStateContainer({ children }) {
         queryItems()
     }, [itemsFilter])
 
-    // useEffect(() => {
-    //     if (itemTypesFetchError) {
-    //         toast.error(`An error ocurred while loading Item Types: ${itemTypesFetchError}`)
-    //     }
-    // }, [itemTypesFetchError])
-
-    // useEffect(() => {
-    //     if (errorMainItemList) {
-    //         toast.error(`An error ocurred while loading Items: ${errorMainItemList}`)
-    //     }
-    // }, [errorMainItemList])
-
     return (
         <AppStateContext.Provider
             value={{
@@ -208,7 +188,6 @@ export function AppStateContainer({ children }) {
                 availableTags,
                 createItem,
                 queryItems,
-                fetchTypes,
                 addTag,
                 removeTag,
                 setMainFilterPage,

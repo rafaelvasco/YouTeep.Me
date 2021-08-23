@@ -23,16 +23,14 @@ const ActivitySelector = ({ color, itemType, active, callback }: SelectorProps) 
         'py-1',
         'mx-1',
         'my-1',
-        'transition-colors',
         'border-4',
         'text-black-300',
         'rounded-full',
         {
             ['bg-transparent']: !active,
             [`border-${color}${color !== 'white' && color !== 'black' ? '-500' : ''} `]: !active,
-            [`hover:border-${color}${
-                color !== 'white' && color !== 'black' ? '-500' : ''
-            }`]: !active,
+            [`hover:border-${color}${color !== 'white' && color !== 'black' ? '-500' : ''}`]:
+                !active,
         },
         {
             [`border-${color}${color !== 'white' && color !== 'black' ? '-500' : ''}`]: active,
@@ -104,10 +102,10 @@ export const FilterPanel = () => {
                         : null}
                 </div>
             </div>
-            <div className="w-full my-5 mx-auto rounded-xl bg-gray-100 dark:bg-gray-800 shadow-lg p-10 text-gray-800 dark:text-gray-100 relative overflow-hidden min-w-80 max-w-3xl transition-colors">
+            <div className="w-full my-5 mx-auto rounded-xl bg-gray-100 dark:bg-gray-800 shadow-lg p-10 text-gray-800 dark:text-gray-100 relative overflow-hidden min-w-80 max-w-3xl">
                 <div className="relative mt-1">
                     <TextInput placeholder="Search..." name="searchInput" />
-                    <button className="block w-7 h-7 text-center text-xl leading-0 absolute top-2 right-2 text-gray-400 focus:outline-none hover:text-gray-900 transition-colors">
+                    <button className="block w-7 h-7 text-center text-xl leading-0 absolute top-2 right-2 text-gray-400 focus:outline-none hover:text-gray-900">
                         <i className="mdi mdi-magnify"></i>
                     </button>
                 </div>

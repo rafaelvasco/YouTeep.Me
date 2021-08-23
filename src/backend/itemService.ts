@@ -121,6 +121,31 @@ export class ItemService {
         return null
     }
 
+    static voteItem = async (itemId: string, votes: number): Promise<any | null> => {
+        try {
+            const result = await api.patch(
+                'item/vote',
+                { votes },
+                {
+                    params: {
+                        id: itemId,
+                    },
+                }
+            )
+            return result
+        } catch (e) {
+            if (e.response.status !== 200) {
+                if (e.response) {
+                    toast.error(e.response.data.message)
+                } else {
+                    toast.error(e.message)
+                }
+            }
+        }
+
+        return null
+    }
+
     static deleteItem = async (itemId: string): Promise<any | null> => {
         console.trace(`Delete Item.`)
 

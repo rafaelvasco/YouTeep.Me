@@ -36,7 +36,7 @@ export const Modal = (props: ModalProps) => {
                                 props.confirm()
                                 close()
                             }}
-                            className="h-10 px-5 m-2 text-indigo-100 transition-colors duration-150 bg-blue-500 rounded-lg focus:shadow-outline hover:bg-blue-800"
+                            className="h-10 px-5 m-2 text-indigo-100 bg-blue-500 rounded-lg focus:shadow-outline hover:bg-blue-800"
                         >
                             {props.confirmLabel ?? 'Confirm'}
                         </button>
@@ -44,7 +44,7 @@ export const Modal = (props: ModalProps) => {
 
                     <button
                         onClick={close}
-                        className="h-10 px-5 m-2 text-indigo-100 transition-colors duration-150 bg-gray-500 rounded-lg focus:shadow-outline hover:bg-gray-800"
+                        className="h-10 px-5 m-2 text-indigo-100 bg-gray-500 rounded-lg focus:shadow-outline hover:bg-gray-800"
                     >
                         {props.closeLabel ?? 'Close'}
                     </button>

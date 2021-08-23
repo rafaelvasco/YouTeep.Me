@@ -58,7 +58,7 @@ export const ItemContentEditor = (props: ItemContentEditorProps) => {
                         <div className="inline-flex ">
                             <button
                                 onClick={handleSave}
-                                className="h-8 px-5 m-2 text-indigo-100 transition-colors duration-150 bg-green-500 rounded-lg focus:shadow-outline hover:bg-green-600"
+                                className="h-8 px-5 m-2 text-indigo-100 bg-green-500 rounded-lg focus:shadow-outline hover:bg-green-600"
                             >
                                 Save
                             </button>
