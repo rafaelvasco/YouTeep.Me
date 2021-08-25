@@ -17,6 +17,8 @@ export interface AppStateData {
     setMainFilterPage: (page: number) => void
     setMainFilterType: (typeId: string) => void
     getMainFilterType: () => ItemType
+    setMainFilterQueryText: (query: string) => void
+    getMainFilterQueryText: () => string
     getMainFilter: () => ItemFilter
     setMainFilter: (filter: ItemFilter) => void
 
@@ -51,6 +53,7 @@ export function AppStateContainer({ children }) {
         page: 1,
         pageSize: PageSize,
         tags: null,
+        queryText: null,
     })
 
     const [mainItemList, setMainItemList] = useState<ItemQueryResult>(null)
@@ -147,6 +150,18 @@ export function AppStateContainer({ children }) {
             : everything()
     }
 
+    const setMainFilterQueryText = (query: string) => {
+        setItemsFilter({
+            ...itemsFilter,
+            queryText: query,
+            page: 1,
+        })
+    }
+
+    const getMainFilterQueryText = () => {
+        return itemsFilter.queryText
+    }
+
     const getMainFilter = () => {
         return itemsFilter
     }
@@ -193,6 +208,8 @@ export function AppStateContainer({ children }) {
                 setMainFilterPage,
                 setMainFilterType,
                 getMainFilterType,
+                setMainFilterQueryText,
+                getMainFilterQueryText,
                 setMainFilter,
                 getMainFilter,
                 getMainItemList,

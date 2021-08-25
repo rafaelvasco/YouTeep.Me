@@ -76,6 +76,7 @@ const convertQueryToFilter = (query): ItemFilter => {
         tags: query.tags ?? null,
         page: parseInt(query.page) ?? 1,
         pageSize: PageSize,
+        queryText: query.text ?? null,
     }
 }
 

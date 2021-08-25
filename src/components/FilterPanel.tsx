@@ -58,6 +58,9 @@ export const FilterPanel = () => {
 
     const { theme } = useTheme()
 
+    const [lastTextQuery, setLastTextQuery] = useState('')
+    const [textQuery, setTextQuery] = useState('')
+
     const [itemTypes, itemTypesFetchError] = useFetch<ItemType[]>('item/types')
 
     useEffect(() => {
@@ -68,8 +71,25 @@ export const FilterPanel = () => {
 
     useEffect(() => setMounted(true), [])
 
+    const updateQueryFilter = () => {
+        appState.setMainFilterQueryText(textQuery)
+    }
+
+    useEffect(() => {
+        if (!lastTextQuery) {
+            return
+        }
+        const timerId = setTimeout(() => updateQueryFilter(), 800)
+        return () => clearTimeout(timerId)
+    }, [textQuery])
+
     const onClickSelector = (itemType: ItemType) => {
         appState.setMainFilterType(itemType.id)
+    }
+
+    const onQueryTextChanged = (text: string) => {
+        setLastTextQuery(textQuery)
+        setTextQuery(text)
     }
 
     if (!mounted) {
@@ -104,10 +124,11 @@ export const FilterPanel = () => {
             </div>
             <div className="w-full my-5 mx-auto rounded-xl bg-gray-100 dark:bg-gray-800 shadow-lg p-10 text-gray-800 dark:text-gray-100 relative overflow-hidden min-w-80 max-w-3xl">
                 <div className="relative mt-1">
-                    <TextInput placeholder="Search..." name="searchInput" />
-                    <button className="block w-7 h-7 text-center text-xl leading-0 absolute top-2 right-2 text-gray-400 focus:outline-none hover:text-gray-900">
-                        <i className="mdi mdi-magnify"></i>
-                    </button>
+                    <TextInput
+                        onChange={onQueryTextChanged}
+                        placeholder="Search..."
+                        name="searchInput"
+                    />
                 </div>
                 <div className="absolute top-0 left-0 w-full h-2 flex">
                     <div
