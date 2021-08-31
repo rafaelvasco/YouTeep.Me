@@ -5,7 +5,6 @@ module.exports = {
     purge: {
         content: ['./src/pages/**/*.{js,jsx,ts,tsx}', './src/components/**/*.{js,jsx,ts,tsx}'],
         options: {
-            safelist: ['type'],
             whitelistPatterns: [/bg/, /border/],
         },
     },
