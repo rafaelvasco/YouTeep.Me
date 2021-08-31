@@ -6,7 +6,7 @@ module.exports = {
         content: ['./src/pages/**/*.{js,jsx,ts,tsx}', './src/components/**/*.{js,jsx,ts,tsx}'],
         options: {
             safelist: ['type'],
-            whitelistPatterns: [/.*bg-.*/, /.*border-.*/],
+            whitelistPatterns: [/^bg-.*/, /^border-.*/, /hover:border-.*/, /hover:bg-.*/],
         },
     },
     darkMode: 'class',
