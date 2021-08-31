@@ -5,7 +5,7 @@ import { ComponentEvents } from './events'
 import { AdminPanelUsers } from './AdminPanelUsers'
 import { AdminPanelItems } from './AdminPanelItems'
 import { ItemContentEditor } from './ItemContentEditor'
-import { ItemCreator } from './ItemCreator'
+import { useMemo } from 'react'
 
 type AdminSectionButtonProps = {
     id: number
@@ -19,24 +19,26 @@ const AdminSectionButton = ({ id, label, startSelected }: AdminSectionButtonProp
 
     const eventBus = useBus()
 
-    const elementClass = classNames(
-        'w-full',
-        'p-2',
-        'shadow-inner',
-        'outline-none',
-        'focus:outline-none',
-        'text-xs',
-        'text-white',
-        'rounded-lg',
-        {
-            ['dark:bg-blue-500']: selected,
-            ['bg-blue-500']: selected,
-        },
-        {
-            ['dark:bg-gray-700']: !selected,
-            ['bg-gray-500']: !selected,
-        }
-    )
+    const elementClass = useMemo(() => {
+        return classNames(
+            'w-full',
+            'p-2',
+            'shadow-inner',
+            'outline-none',
+            'focus:outline-none',
+            'text-xs',
+            'text-white',
+            'rounded-lg',
+            {
+                ['dark:bg-blue-500']: selected,
+                ['bg-blue-500']: selected,
+            },
+            {
+                ['dark:bg-gray-700']: !selected,
+                ['bg-gray-500']: !selected,
+            }
+        )
+    }, [selected])
 
     useListener(ComponentEvents.AdminSectionSelected, (section: number) => {
         setSelected(section === id)
@@ -53,6 +55,25 @@ const AdminSectionButton = ({ id, label, startSelected }: AdminSectionButtonProp
     )
 }
 
+type AdminPanelStateType = {
+    sectionIdx: number
+    sectionButtons: JSX.Element[]
+}
+
+const InitialState = {
+    sectionIdx: 0,
+    sectionButtons: SECTIONS.map((section, index) => {
+        return (
+            <AdminSectionButton
+                id={index}
+                key={section}
+                label={section}
+                startSelected={index === 0}
+            />
+        )
+    }),
+} as AdminPanelStateType
+
 export const AdminPanel = () => {
     const UserSection = 0
     const ItemSection = 1
@@ -62,28 +83,9 @@ export const AdminPanel = () => {
 
     const eventBus = useBus()
 
-    type AdminPanelStateType = {
-        sectionIdx: number
-        sectionButtons: JSX.Element[]
-    }
-
-    const initialState = {
-        sectionIdx: 0,
-        sectionButtons: SECTIONS.map((section, index) => {
-            return (
-                <AdminSectionButton
-                    id={index}
-                    key={section}
-                    label={section}
-                    startSelected={index === 0}
-                />
-            )
-        }),
-    } as AdminPanelStateType
-
     const [state, changeSection] = useReducer((state: AdminPanelStateType, newIndex: number) => {
         return { ...state, sectionIdx: newIndex }
-    }, initialState)
+    }, InitialState)
 
     useListener(ComponentEvents.AdminSectionSelected, (section: number) => {
         if (section < 0) {

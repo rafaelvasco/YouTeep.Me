@@ -1,4 +1,4 @@
-import { ItemFilter } from '@/types/ItemFilter'
+import { ItemFilter, itemFilterEmpty, itemFiltersCompare } from '@/types/ItemFilter'
 import { PageSize } from '@/data/config'
 import { everything, ItemType } from '@/types/ItemType'
 import { createContext, useContext, useState } from 'react'
@@ -9,17 +9,20 @@ import { ComponentEvents } from '@/components/events'
 import { ItemCreateRequest } from '@/types/ItemCreateRequest'
 import { ItemService } from '@/backend/itemService'
 import { useEffect } from 'react'
+import { useRouter } from 'next/router'
+import { buildQueryUrl } from '@/lib/utils'
 
 export interface AppStateData {
     availableTypes: ItemType[]
     availableTags: string[]
 
+    getAvailableItemTypes: () => Array<ItemType>
     setMainFilterPage: (page: number) => void
+    getMainFilterPage: () => number
     setMainFilterType: (typeId: string) => void
     getMainFilterType: () => ItemType
     setMainFilterQueryText: (query: string) => void
     getMainFilterQueryText: () => string
-    getMainFilter: () => ItemFilter
     setMainFilter: (filter: ItemFilter) => void
 
     queryItems: () => void
@@ -56,6 +59,8 @@ export function AppStateContainer({ children }) {
         queryText: null,
     })
 
+    const router = useRouter()
+
     const [mainItemList, setMainItemList] = useState<ItemQueryResult>(null)
 
     const [availableTypes, setAvailableTypes] = useState<ItemType[]>([])
@@ -63,10 +68,6 @@ export function AppStateContainer({ children }) {
     const [adminActivated, setAdminActivated] = useState(false)
 
     const [availableTags, setAvailableTags] = useState([])
-
-    useEffect(() => {
-        fetchTypes()
-    }, [])
 
     /* ===== ITEM ================================================  */
     /* ============================================================ */
@@ -113,11 +114,8 @@ export function AppStateContainer({ children }) {
     /* ============================================================ */
 
     const fetchTypes = async () => {
-        const result = await ItemService.fetchItemTypes()
-
-        if (result) {
-            setAvailableTypes(result)
-        }
+        const types = await ItemService.fetchItemTypes()
+        setAvailableTypes(types)
     }
 
     /* ===== TAGS ================================================= */
@@ -144,10 +142,18 @@ export function AppStateContainer({ children }) {
         })
     }
 
+    const getAvailableItemTypes = () => {
+        return availableTypes
+    }
+
     const getMainFilterType = () => {
-        return itemsFilter.type
+        return itemsFilter?.type
             ? availableTypes.find((t) => t.id === itemsFilter.type)
             : everything()
+    }
+
+    const getMainFilterPage = () => {
+        return itemsFilter?.page
     }
 
     const setMainFilterQueryText = (query: string) => {
@@ -159,11 +165,7 @@ export function AppStateContainer({ children }) {
     }
 
     const getMainFilterQueryText = () => {
-        return itemsFilter.queryText
-    }
-
-    const getMainFilter = () => {
-        return itemsFilter
+        return itemsFilter?.queryText
     }
 
     const setMainFilter = (filter: ItemFilter) => {
@@ -189,10 +191,56 @@ export function AppStateContainer({ children }) {
         setAdminActivated(!adminActivated)
     }
 
+    /* ===== INITIALIZATION========================================  */
+    /* ============================================================ */
+
+    const convertQueryToFilter = (query): ItemFilter => {
+        return {
+            type: query.type ? (query.type as string) : null,
+            tags: query.tags ?? null,
+            page: parseInt(query.page) ?? 1,
+            pageSize: PageSize,
+            queryText: query.queryText ?? null,
+        }
+    }
+
+    const updateFilterFromUrlQuery = async (query) => {
+        if (Object.keys(query).length > 0) {
+            const filter = convertQueryToFilter(query)
+
+            if (!itemFiltersCompare(filter, itemsFilter)) {
+                console.log('NOT EQUAL')
+                setMainFilter(filter)
+            }
+        }
+    }
+
+    const filterToUrlQuery = (itemFilter: ItemFilter) => {
+        if (!itemFilterEmpty(itemFilter)) {
+            const url = buildQueryUrl(itemFilter)
+            router.push(url)
+        } else {
+            router.replace('/')
+        }
+    }
+
     /* ===========================================================  */
     /* ============================================================ */
 
     useEffect(() => {
+        fetchTypes()
+    }, [])
+
+    useEffect(() => {
+        updateFilterFromUrlQuery(router.query)
+    }, [router.isReady])
+
+    useEffect(() => {
+        filterToUrlQuery(itemsFilter)
+    }, [itemsFilter])
+
+    useEffect(() => {
+        console.log('QUERY ITEMS')
         queryItems()
     }, [itemsFilter])
 
@@ -205,13 +253,14 @@ export function AppStateContainer({ children }) {
                 queryItems,
                 addTag,
                 removeTag,
+                getAvailableItemTypes,
                 setMainFilterPage,
+                getMainFilterPage,
                 setMainFilterType,
                 getMainFilterType,
                 setMainFilterQueryText,
                 getMainFilterQueryText,
                 setMainFilter,
-                getMainFilter,
                 getMainItemList,
                 getAdminActive,
                 setAdminActive,

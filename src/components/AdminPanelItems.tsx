@@ -3,7 +3,6 @@ import { PageSize } from '@/data/config'
 import { Item } from '@/types/Item'
 import { ItemFilter } from '@/types/ItemFilter'
 import { ItemQueryResult } from '@/types/ItemQueryResult'
-import { ItemType } from '@/types/ItemType'
 import dynamic from 'next/dynamic'
 import { useEffect, useMemo, useState } from 'react'
 import { useBus, useListener } from 'react-bus'
@@ -25,11 +24,11 @@ const ModalComponent = dynamic(() => import('@/components/Modal').then((mod) => 
 }) as typeof Modal
 
 export const AdminPanelItems = () => {
-    const [itemTypes, itemTypesFetchError] = useFetch<ItemType[]>('item/types')
-
-    const appContext = useAppContext()
+    const appState = useAppContext()
 
     const eventBus = useBus()
+
+    const [itemsQueryResult, setItemsQueryResult] = useState<ItemQueryResult>(null)
 
     const [page, setPage] = useState(1)
 
@@ -48,26 +47,27 @@ export const AdminPanelItems = () => {
         [page]
     )
 
-    const [queryResult, error, mutate] = useFetch<ItemQueryResult>('item/query', query)
+    useEffect(() => {
+        fetchItems()
+    }, [page])
 
     useEffect(() => {
-        if (error) {
-            toast.error(`An error ocurred while fetching Items: ${error}`)
-        }
-    }, [error])
+        fetchItems()
+    }, [])
 
-    useEffect(() => {
-        if (itemTypesFetchError) {
-            toast.error(`An error ocurred while fetching ItemTypes: ${error}`)
+    const fetchItems = async () => {
+        const result = await ItemService.queryItems(query)
+        if (result) {
+            setItemsQueryResult(result)
         }
-    }, [itemTypesFetchError])
+    }
 
     const onItemTypeChanged = async (itemTypeId: string, item: Item) => {
         await ItemService.editItem(item.id, { type: itemTypeId })
 
         toast.success('Item Type changed Successfuly')
 
-        mutate()
+        await fetchItems()
     }
 
     const onItemNameChanged = async (name: string, item: Item) => {
@@ -75,16 +75,16 @@ export const AdminPanelItems = () => {
 
         toast.success('Item Named changed Successfuly')
 
-        mutate()
+        await fetchItems()
     }
 
-    useListener(ComponentEvents.ItemListModified, () => {
-        mutate()
+    useListener(ComponentEvents.ItemListModified, async () => {
+        await fetchItems()
     })
 
     return (
         <>
-            {queryResult ? (
+            {itemsQueryResult?.items ? (
                 <div className="flex flex-col w-full">
                     <Table
                         className="w-full table-auto"
@@ -95,7 +95,7 @@ export const AdminPanelItems = () => {
                             user: 'User',
                             createdAt: 'Created',
                         }}
-                        items={queryResult.items}
+                        items={itemsQueryResult.items}
                         customRenderers={{
                             name: (item) => {
                                 return (
@@ -115,7 +115,7 @@ export const AdminPanelItems = () => {
                                         name="itemType"
                                         data={item}
                                         value={item.type.id}
-                                        options={itemTypes.map((type) => {
+                                        options={appState.getAvailableItemTypes().map((type) => {
                                             return {
                                                 label: type.name.toUpperCase(),
                                                 value: type.id,
@@ -167,7 +167,7 @@ export const AdminPanelItems = () => {
                     <div>
                         <Paginator
                             page={page}
-                            count={queryResult.totalQty}
+                            count={itemsQueryResult.totalQty}
                             paginate={(delta: number) => {
                                 setPage(page + delta)
                             }}
@@ -176,7 +176,7 @@ export const AdminPanelItems = () => {
                     {deleteModalOpen ? (
                         <ModalComponent
                             confirm={() => {
-                                appContext.deleteItem(itemToDelete)
+                                appState.deleteItem(itemToDelete)
                             }}
                             setOpen={setDeleteModalOpen}
                             confirmLabel="Yes, Remove"

@@ -24,7 +24,6 @@ export const Paginator = (props: PaginatorProps) => {
 
     const goToPage = (page: number) => {
         page = Math.max(1, Math.min(page, maxPage))
-
         props.paginate(page - props.page)
     }
 

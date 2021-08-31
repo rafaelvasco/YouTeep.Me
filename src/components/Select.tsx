@@ -1,6 +1,4 @@
-import { fi } from 'date-fns/locale'
 import React, { Ref, useState } from 'react'
-import { useEffect } from 'react'
 import { Control, Controller } from 'react-hook-form'
 
 type SelectOption<T> = {

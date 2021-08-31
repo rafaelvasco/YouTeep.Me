@@ -7,5 +7,15 @@ export type ItemFilter = {
 }
 
 export const itemFilterEmpty = (filter: ItemFilter) => {
-    return filter.type === null && !filter.tags && filter.page === 1
+    return (
+        !filter || (filter.type === null && !filter.tags && filter.page === 1 && !filter.queryText)
+    )
+}
+
+export const itemFiltersCompare = (filterA: ItemFilter, filterB: ItemFilter) => {
+    return (
+        filterA.page === filterB.page &&
+        filterA.queryText === filterB.queryText &&
+        filterA.type === filterB.type
+    )
 }

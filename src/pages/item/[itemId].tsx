@@ -21,6 +21,10 @@ const ItemDetail = () => {
     const [item, setItem] = useState(null)
     const [itemContent, setItemContent] = useState(null)
 
+    const goBack = () => {
+        router.back()
+    }
+
     const fetchItem = async () => {
         try {
             const result = await api.get<Item>('item', {
@@ -60,12 +64,13 @@ const ItemDetail = () => {
                     <div className="max-w-5xl w-full my-5 mx-auto">
                         <div className="grid grid-cols-1 gap-10">
                             <div className="w-32">
-                                <LinkEx href="/" aria-label="GoBack">
-                                    <div className="flex rounded-md dark:bg-gray-100 bg-gray-800 p-2 px-4  dark:hover:bg-blue-400 hover:bg-blue-400 dark:text-gray-800 text-gray-100 dark:hover:text-gray-100  ">
-                                        <IoMdArrowRoundBack size={24} className="inline-flex" />
-                                        <div className="inline-flex">Go Back</div>
-                                    </div>
-                                </LinkEx>
+                                <button
+                                    onClick={goBack}
+                                    className="flex rounded-md dark:bg-gray-100 bg-gray-800 p-2 px-4  dark:hover:bg-blue-400 hover:bg-blue-400 dark:text-gray-800 text-gray-100 dark:hover:text-gray-100  "
+                                >
+                                    <IoMdArrowRoundBack size={24} className="inline-flex" />
+                                    <div className="inline-flex">Go Back</div>
+                                </button>
                             </div>
                             <Image
                                 alt={item.name}

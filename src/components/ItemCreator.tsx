@@ -1,16 +1,12 @@
-import { useContext, useEffect, useState } from 'react'
-import { useFetch } from '@/backend/requestHooks'
+import { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import toast from 'react-hot-toast'
 import { AuthContext } from '@/contexts/authContext'
-import { ItemType } from '@/types/ItemType'
 import { Select } from './Select'
 import { TextInput } from './TextInput'
 import { ImageScraper } from './ImageScraper'
-import extApi from '@/backend/extApi'
 import { ImageInputFile } from './ImageInputFile'
-import { getUrlFileExtension } from '@/lib/utils'
 import { useAppContext } from '@/contexts/appContext'
 import { ItemCreateRequest } from '@/types/ItemCreateRequest'
 
@@ -22,9 +18,7 @@ type Inputs = {
 }
 
 export const ItemCreator = () => {
-    const appContext = useAppContext()
-
-    const [itemTypes, itemTypesFetchError] = useFetch<ItemType[]>('item/types')
+    const appState = useAppContext()
 
     const { userInfo } = useContext(AuthContext)
 
@@ -36,8 +30,6 @@ export const ItemCreator = () => {
         control,
         formState: { errors, isSubmitting },
     } = useForm<Inputs>()
-
-    //const imageUploadRef = useRef(null)
 
     const onSubmit = async (data: Inputs) => {
         let requestBody = {
@@ -57,7 +49,7 @@ export const ItemCreator = () => {
         }
 
         try {
-            appContext.createItem(requestBody)
+            appState.createItem(requestBody)
             resetForm()
         } catch (e) {}
     }
@@ -67,12 +59,6 @@ export const ItemCreator = () => {
         // tslint:disable-next-line
         //imageUploadRef.current?.clear()
     }
-
-    useEffect(() => {
-        if (itemTypesFetchError) {
-            toast.error(`An error ocurred while loading Item Types: ${itemTypesFetchError}`)
-        }
-    }, [itemTypesFetchError])
 
     const handleToggleExpandedClick = () => {
         setExpanded(!expanded)
@@ -128,18 +114,20 @@ export const ItemCreator = () => {
 
                                 <label className="block">
                                     <span className="text-gray-700 dark:text-gray-200">Type:</span>
-                                    {itemTypes ? (
+                                    {appState.getAvailableItemTypes() ? (
                                         <Select
                                             formControl={control}
                                             required={true}
                                             name="itemType"
                                             className="ml-4"
-                                            options={itemTypes.map((type) => {
-                                                return {
-                                                    label: type.name.toUpperCase(),
-                                                    value: type.id,
-                                                }
-                                            })}
+                                            options={appState
+                                                .getAvailableItemTypes()
+                                                .map((type) => {
+                                                    return {
+                                                        label: type.name.toUpperCase(),
+                                                        value: type.id,
+                                                    }
+                                                })}
                                         />
                                     ) : null}
                                 </label>

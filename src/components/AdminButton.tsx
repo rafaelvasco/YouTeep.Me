@@ -5,8 +5,6 @@ import { RiAdminFill } from 'react-icons/ri'
 export const AdminButton = () => {
     const appContext = useAppContext()
 
-    useEffect(() => {}, [])
-
     const handleClick = () => {
         appContext.toggleAdminActive()
     }

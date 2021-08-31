@@ -1,4 +1,4 @@
-export type ConfirmModalProps = {
+type ConfirmModalProps = {
     title: string
     message: string
 }

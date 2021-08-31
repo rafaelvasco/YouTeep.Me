@@ -19,8 +19,6 @@ export const ItemContentEditor = (props: ItemContentEditorProps) => {
     const [editedItem, setEditedItem] = useState<Item>(null)
     const [editedContent, setEditedContent] = useState('')
 
-    useEffect(() => {})
-
     useEffect(() => {
         fetchItem(props.itemId)
     }, [props.itemId])

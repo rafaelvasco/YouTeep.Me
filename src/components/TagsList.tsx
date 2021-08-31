@@ -1,6 +1,3 @@
-import { useBus } from 'react-bus'
-import { ComponentEvents } from './events'
-
 type Props = {
     tagList: string[]
 }

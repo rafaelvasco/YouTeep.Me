@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import classNames from 'classnames'
 import { useTheme } from 'next-themes'
-import { useFetch } from '@/backend/requestHooks'
-import toast from 'react-hot-toast'
 import { everything, ItemType } from '@/types/ItemType'
 import { TextInput } from './TextInput'
 import { useAppContext } from '@/contexts/appContext'
+import { useRef } from 'react'
+import { useMemo } from 'react'
 
 type SelectorProps = {
     color: string
@@ -15,29 +15,32 @@ type SelectorProps = {
 }
 
 const ActivitySelector = ({ color, itemType, active, callback }: SelectorProps) => {
-    const elementClass = classNames(
-        'focus:outline-none',
-        'uppercase',
-        'cursor-default',
-        'px-4',
-        'py-1',
-        'mx-1',
-        'my-1',
-        'border-4',
-        'text-black-300',
-        'rounded-full',
-        {
-            ['bg-transparent']: !active,
-            [`border-${color}${color !== 'white' && color !== 'black' ? '-500' : ''} `]: !active,
-            [`hover:border-${color}${color !== 'white' && color !== 'black' ? '-500' : ''}`]:
-                !active,
-        },
-        {
-            [`border-${color}${color !== 'white' && color !== 'black' ? '-500' : ''}`]: active,
-            [`bg-${color}${color !== 'white' && color !== 'black' ? '-500' : ''}`]: active,
-            [`${color != 'white' ? 'text-white' : 'text-black'}`]: active,
-        }
-    )
+    const elementClass = useMemo(() => {
+        return classNames(
+            'focus:outline-none',
+            'uppercase',
+            'cursor-default',
+            'px-4',
+            'py-1',
+            'mx-1',
+            'my-1',
+            'border-4',
+            'text-black-300',
+            'rounded-full',
+            {
+                ['bg-transparent']: !active,
+                [`border-${color}${color !== 'white' && color !== 'black' ? '-500' : ''} `]:
+                    !active,
+                [`hover:border-${color}${color !== 'white' && color !== 'black' ? '-500' : ''}`]:
+                    !active,
+            },
+            {
+                [`border-${color}${color !== 'white' && color !== 'black' ? '-500' : ''}`]: active,
+                [`bg-${color}${color !== 'white' && color !== 'black' ? '-500' : ''}`]: active,
+                [`${color != 'white' ? 'text-white' : 'text-black'}`]: active,
+            }
+        )
+    }, [active, color])
 
     return (
         <button
@@ -58,22 +61,14 @@ export const FilterPanel = () => {
 
     const { theme } = useTheme()
 
+    const inputQueryRef = useRef<HTMLInputElement>()
+
     const [lastTextQuery, setLastTextQuery] = useState('')
     const [textQuery, setTextQuery] = useState('')
 
-    const [itemTypes, itemTypesFetchError] = useFetch<ItemType[]>('item/types')
-
     useEffect(() => {
-        if (itemTypesFetchError) {
-            toast.error(`An error ocurred while loading Item Types: ${itemTypesFetchError}`)
-        }
-    }, [itemTypesFetchError])
-
-    useEffect(() => setMounted(true), [])
-
-    const updateQueryFilter = () => {
-        appState.setMainFilterQueryText(textQuery)
-    }
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
         if (!lastTextQuery) {
@@ -83,11 +78,19 @@ export const FilterPanel = () => {
         return () => clearTimeout(timerId)
     }, [textQuery])
 
+    const updateQueryFilter = () => {
+        appState.setMainFilterQueryText(textQuery)
+    }
+
     const onClickSelector = (itemType: ItemType) => {
         appState.setMainFilterType(itemType.id)
     }
 
     const onQueryTextChanged = (text: string) => {
+        if (appState.getMainFilterQueryText() && text === appState.getMainFilterQueryText()) {
+            return
+        }
+
         setLastTextQuery(textQuery)
         setTextQuery(text)
     }
@@ -103,18 +106,23 @@ export const FilterPanel = () => {
                     <ActivitySelector
                         itemType={everything()}
                         callback={onClickSelector}
-                        active={appState.getMainFilter().type === null}
+                        active={
+                            appState.getMainFilterType() && appState.getMainFilterType().id === null
+                        }
                         color={theme === 'dark' ? 'white' : 'black'}
                     />
 
-                    {itemTypes
-                        ? itemTypes.map((type: ItemType) => {
+                    {appState.getAvailableItemTypes()
+                        ? appState.getAvailableItemTypes().map((type: ItemType) => {
                               return (
                                   <ActivitySelector
                                       key={type.id}
                                       itemType={type}
                                       callback={onClickSelector}
-                                      active={appState.getMainFilter().type === type.id}
+                                      active={
+                                          appState.getMainFilterType() &&
+                                          appState.getMainFilterType().id === type.id
+                                      }
                                       color={type.color}
                                   />
                               )
@@ -125,6 +133,7 @@ export const FilterPanel = () => {
             <div className="w-full my-5 mx-auto rounded-xl bg-gray-100 dark:bg-gray-800 shadow-lg p-10 text-gray-800 dark:text-gray-100 relative overflow-hidden min-w-80 max-w-3xl">
                 <div className="relative mt-1">
                     <TextInput
+                        ref={inputQueryRef}
                         onChange={onQueryTextChanged}
                         placeholder="Search..."
                         name="searchInput"
@@ -133,7 +142,7 @@ export const FilterPanel = () => {
                 <div className="absolute top-0 left-0 w-full h-2 flex">
                     <div
                         className={`h-2 bg-${
-                            appState.getMainFilter().type !== null
+                            appState.getMainFilterType() && appState.getMainFilterType() !== null
                                 ? appState.getMainFilterType().color + '-500'
                                 : theme === 'dark'
                                 ? 'white'

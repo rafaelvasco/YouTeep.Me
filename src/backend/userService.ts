@@ -9,6 +9,21 @@ type EditUserProps = {
 }
 
 export class UserService {
+    static getAllUsers = async (): Promise<Array<User> | undefined> => {
+        try {
+            const result = await api.get<Array<User>>('user')
+            return result.data
+        } catch (e) {
+            if (e.response.status === 500 || e.response.status === 400) {
+                if (e.response) {
+                    toast.error(e.response.data.message)
+                } else {
+                    toast.error(e.message)
+                }
+            }
+        }
+    }
+
     static getUser = async (userId: string): Promise<User | null> => {
         try {
             const result = await api.get<User>('user', {

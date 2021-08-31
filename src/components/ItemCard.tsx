@@ -1,7 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { useBus } from 'react-bus'
-import { ComponentEvents } from './events'
 import { Item } from '@/types/Item'
 import { FaHeart } from 'react-icons/fa'
 import { useAppContext } from '@/contexts/appContext'
@@ -13,7 +11,7 @@ type Props = {
 export const ItemCard = (props: Props) => {
     const link = `/item/${props.item.id}`
 
-    const appContext = useAppContext()
+    const appState = useAppContext()
 
     return (
         <div className="relative p-4 md:w-1/2 md" style={{ maxWidth: '544px' }}>
@@ -47,7 +45,7 @@ export const ItemCard = (props: Props) => {
                     <FaHeart
                         size={32}
                         onClick={() => {
-                            appContext.voteItem(props.item.id)
+                            appState.voteItem(props.item.id)
                         }}
                         className="absolute right-8 bottom-8 cursor-pointer text-red-600 hover:text-red-300 active:text-red-900"
                     />

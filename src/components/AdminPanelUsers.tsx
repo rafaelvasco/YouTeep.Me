@@ -2,6 +2,7 @@ import { useFetch } from '@/backend/requestHooks'
 import { UserService } from '@/backend/userService'
 import { User } from '@/types/User'
 import { UserRole } from '@/types/UserRole'
+import { useState } from 'react'
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import Loader from 'react-loader-spinner'
@@ -10,33 +11,35 @@ import { Table } from './Table'
 import { Toggler } from './Toggler'
 
 export const AdminPanelUsers = () => {
-    const [queryResult, error, mutate] = useFetch<User[]>('user')
+    const [users, setUsers] = useState<Array<User>>([])
 
     useEffect(() => {
-        if (error) {
-            toast.error(`An error ocurred while loading Users: ${error}`)
+        fetchUsers()
+    }, [])
+
+    const fetchUsers = async () => {
+        const result = await UserService.getAllUsers()
+
+        if (result) {
+            setUsers(result)
         }
-    }, [error])
+    }
 
     const onUserActiveChanged = async (active: boolean, user: User) => {
         await UserService.editUser(user.id, { active })
-
         toast.success(active ? 'User is now Active.' : 'User Deactivated.')
-
-        mutate()
+        await fetchUsers()
     }
 
     const onUserRoleChanged = async (selected: UserRole | null, user: User) => {
         await UserService.editUser(user.id, { role: selected })
-
         toast.success('User role changed Successfuly')
-
-        mutate()
+        await fetchUsers()
     }
 
     return (
         <>
-            {queryResult ? (
+            {users ? (
                 <div className="flex flex-col w-full">
                     <Table
                         className="w-full table-auto"
@@ -47,7 +50,7 @@ export const AdminPanelUsers = () => {
                             role: 'Role',
                             active: 'Active',
                         }}
-                        items={queryResult}
+                        items={users}
                         customRenderers={{
                             active: (user) => {
                                 return (
