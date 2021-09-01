@@ -18,6 +18,7 @@ interface TextInputProps<T> {
     data?: any
     required?: boolean
     formControl?: Control<any>
+    disabled?: boolean
 }
 
 export const TextInput = React.forwardRef(
@@ -32,6 +33,7 @@ export const TextInput = React.forwardRef(
             name,
             formControl,
             data = null,
+            disabled = false,
             ...rest
         }: TextInputProps<T>,
         ref?: Ref<any>
@@ -66,6 +68,7 @@ export const TextInput = React.forwardRef(
                     <InputElement
                         value={val}
                         ref={ref}
+                        disabled={disabled}
                         className={baseClass + (className ?? '')}
                         onChange={({ target: { value } }: InputChangeEvent) => {
                             onChange?.(value, data)

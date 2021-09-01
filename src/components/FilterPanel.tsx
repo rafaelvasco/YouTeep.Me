@@ -57,6 +57,8 @@ const ActivitySelector = ({ color, itemType, active, callback }: SelectorProps) 
 export const FilterPanel = () => {
     const appState = useAppContext()
 
+    const TextQueryTimeout = 500
+
     const [mounted, setMounted] = useState(false)
 
     const { theme } = useTheme()
@@ -74,20 +76,20 @@ export const FilterPanel = () => {
         if (!lastTextQuery) {
             return
         }
-        const timerId = setTimeout(() => updateQueryFilter(), 800)
+        const timerId = setTimeout(() => updateQueryFilter(), TextQueryTimeout)
         return () => clearTimeout(timerId)
     }, [textQuery])
 
     const updateQueryFilter = () => {
-        appState.setMainFilterQueryText(textQuery)
+        appState.setItemFilterQueryText(textQuery)
     }
 
     const onClickSelector = (itemType: ItemType) => {
-        appState.setMainFilterType(itemType.id)
+        appState.setItemFilterType(itemType.id)
     }
 
     const onQueryTextChanged = (text: string) => {
-        if (appState.getMainFilterQueryText() && text === appState.getMainFilterQueryText()) {
+        if (appState.getItemFilterQueryText() && text === appState.getItemFilterQueryText()) {
             return
         }
 
@@ -107,7 +109,7 @@ export const FilterPanel = () => {
                         itemType={everything()}
                         callback={onClickSelector}
                         active={
-                            appState.getMainFilterType() && appState.getMainFilterType().id === null
+                            appState.getItemFilterType() && appState.getItemFilterType().id === null
                         }
                         color={theme === 'dark' ? 'white' : 'black'}
                     />
@@ -120,8 +122,8 @@ export const FilterPanel = () => {
                                       itemType={type}
                                       callback={onClickSelector}
                                       active={
-                                          appState.getMainFilterType() &&
-                                          appState.getMainFilterType().id === type.id
+                                          appState.getItemFilterType() &&
+                                          appState.getItemFilterType().id === type.id
                                       }
                                       color={type.color}
                                   />
@@ -133,6 +135,8 @@ export const FilterPanel = () => {
             <div className="w-full my-5 mx-auto rounded-xl bg-gray-100 dark:bg-gray-800 shadow-lg p-10 text-gray-800 dark:text-gray-100 relative overflow-hidden min-w-80 max-w-3xl">
                 <div className="relative mt-1">
                     <TextInput
+                        disabled={appState.isLoadingResultList()}
+                        className={'disabled:opacity-20'}
                         ref={inputQueryRef}
                         onChange={onQueryTextChanged}
                         placeholder="Search..."
@@ -142,8 +146,8 @@ export const FilterPanel = () => {
                 <div className="absolute top-0 left-0 w-full h-2 flex">
                     <div
                         className={`h-2 bg-${
-                            appState.getMainFilterType() && appState.getMainFilterType() !== null
-                                ? appState.getMainFilterType().color + '-500'
+                            appState.getItemFilterType() && appState.getItemFilterType() !== null
+                                ? appState.getItemFilterType().color + '-500'
                                 : theme === 'dark'
                                 ? 'white'
                                 : 'black'
@@ -154,3 +158,5 @@ export const FilterPanel = () => {
         </>
     )
 }
+
+FilterPanel.whyDidYouRender = true

@@ -4,6 +4,7 @@ export type ItemFilter = {
     page: number
     pageSize: number
     queryText: string | null
+    active?: boolean
 }
 
 export const itemFilterEmpty = (filter: ItemFilter) => {

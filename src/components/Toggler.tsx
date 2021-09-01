@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface TogglerProps<T extends {}> {
@@ -12,22 +13,29 @@ export const Toggler = <T extends {}>(props: TogglerProps<T>) => {
 
     const element = useRef(null)
 
-    const handleOnChange = useCallback(() => {
+    const [id, setId] = useState(null)
+
+    useEffect(() => {
+        setId(nanoid())
+    }, [])
+
+    const handleOnChange = () => {
+        console.log(props.data)
         setActive(element.current.checked)
         props.onChange?.(element.current.checked, props.data ?? null)
-    }, [])
+    }
 
     return (
         <>
             <div className="flex items-center justify-center w-full">
-                <label htmlFor="toggleB" className="flex items-center cursor-pointer">
+                <label htmlFor={id} className="flex items-center cursor-pointer">
                     <div className="relative">
                         <input
                             ref={element}
+                            id={id}
                             checked={active ?? false}
                             onChange={handleOnChange}
                             type="checkbox"
-                            id="toggleB"
                             className="sr-only"
                         />
                         <div className="block bg-gray-300 w-14 h-8 rounded-full"></div>

@@ -8,11 +8,23 @@ import { ItemCreator } from '@/components/ItemCreator'
 import { useAppContext } from '@/contexts/appContext'
 import { useContext } from 'react'
 import { AuthContext } from '@/contexts/authContext'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 const Home = () => {
     const appState = useAppContext()
 
     const { loggedIn } = useContext(AuthContext)
+
+    const router = useRouter()
+
+    useEffect(() => {
+        appState.updateFilterFromUrlQuery(router.query)
+    }, [router.isReady])
+
+    useEffect(() => {
+        appState.updateUrlQueryFromFilter(appState.getItemFilter())
+    }, [appState.getItemFilter()])
 
     return (
         <>
@@ -38,5 +50,7 @@ const Home = () => {
         </>
     )
 }
+
+Home.whyDidYouRender = true
 
 export default Home

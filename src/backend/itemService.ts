@@ -11,6 +11,7 @@ type EditItemProps = {
     type?: string
     content?: string
     votes?: number
+    active?: boolean
 }
 
 export class ItemService {

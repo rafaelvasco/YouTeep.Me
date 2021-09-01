@@ -18,6 +18,8 @@ import { ConfirmModal } from './ConfirmModal'
 import Loader from 'react-loader-spinner'
 import { useAppContext } from '@/contexts/appContext'
 import { ItemService } from '@/backend/itemService'
+import { useRouter } from 'next/router'
+import { Toggler } from './Toggler'
 
 const ModalComponent = dynamic(() => import('@/components/Modal').then((mod) => mod.Modal), {
     ssr: false,
@@ -27,6 +29,8 @@ export const AdminPanelItems = () => {
     const appState = useAppContext()
 
     const eventBus = useBus()
+
+    const router = useRouter()
 
     const [itemsQueryResult, setItemsQueryResult] = useState<ItemQueryResult>(null)
 
@@ -78,6 +82,17 @@ export const AdminPanelItems = () => {
         await fetchItems()
     }
 
+    const onItemActiveChanged = async (active: boolean, item: Item) => {
+        console.log(`${item.name}`)
+        await ItemService.editItem(item.id, { active })
+        toast.success(active ? 'Item is now Active.' : 'Item deactivated.')
+        await fetchItems()
+    }
+
+    const navigateViewItem = (item: Item) => {
+        router.push(`/item/${item.id}`)
+    }
+
     useListener(ComponentEvents.ItemListModified, async () => {
         await fetchItems()
     })
@@ -94,6 +109,7 @@ export const AdminPanelItems = () => {
                             type: 'Type',
                             user: 'User',
                             createdAt: 'Created',
+                            active: 'Active',
                         }}
                         items={itemsQueryResult.items}
                         customRenderers={{
@@ -131,12 +147,21 @@ export const AdminPanelItems = () => {
                             createdAt: (item) => {
                                 return <DateDisplay dateString={item.createdAt} />
                             },
+                            active: (item) => {
+                                return (
+                                    <Toggler
+                                        data={item}
+                                        onChange={onItemActiveChanged}
+                                        active={item.active}
+                                    />
+                                )
+                            },
                         }}
                         actions={[
                             (it: Item) => {
                                 return (
                                     <button
-                                        className="px-5 py-2 bg-blue-500 rounded-lg text-white"
+                                        className="px-5 py-2 bg-yellow-500 rounded-lg text-white"
                                         onClick={() => {
                                             eventBus.emit(
                                                 ComponentEvents.AdminItemPanelItemEditSelected,
@@ -151,13 +176,25 @@ export const AdminPanelItems = () => {
                             (it: Item) => {
                                 return (
                                     <button
-                                        className="px-5 py-2 bg-blue-500 rounded-lg text-white"
+                                        className="px-5 py-2 bg-red-500 rounded-lg text-white"
                                         onClick={() => {
                                             setDeleteModalOpen(true)
                                             setItemToDelete(it.id)
                                         }}
                                     >
                                         Delete
+                                    </button>
+                                )
+                            },
+                            (it: Item) => {
+                                return (
+                                    <button
+                                        className="px-5 py-2 bg-green-500 rounded-lg text-white"
+                                        onClick={() => {
+                                            navigateViewItem(it)
+                                        }}
+                                    >
+                                        View
                                     </button>
                                 )
                             },

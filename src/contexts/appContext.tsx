@@ -8,22 +8,28 @@ import { useBus } from 'react-bus'
 import { ComponentEvents } from '@/components/events'
 import { ItemCreateRequest } from '@/types/ItemCreateRequest'
 import { ItemService } from '@/backend/itemService'
-import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { buildQueryUrl } from '@/lib/utils'
+import { useMemo } from 'react'
+import { useEffect } from 'react'
 
 export interface AppStateData {
     availableTypes: ItemType[]
     availableTags: string[]
 
+    isLoadingResultList: () => boolean
+
     getAvailableItemTypes: () => Array<ItemType>
-    setMainFilterPage: (page: number) => void
-    getMainFilterPage: () => number
-    setMainFilterType: (typeId: string) => void
-    getMainFilterType: () => ItemType
-    setMainFilterQueryText: (query: string) => void
-    getMainFilterQueryText: () => string
-    setMainFilter: (filter: ItemFilter) => void
+    setItemFilterPage: (page: number) => void
+    getItemFilterPage: () => number
+    setItemFilterType: (typeId: string) => void
+    getItemFilterType: () => ItemType
+    setItemFilterQueryText: (query: string) => void
+    getItemFilterQueryText: () => string
+    getItemFilter: () => ItemFilter
+
+    updateFilterFromUrlQuery: (query: any) => void
+    updateUrlQueryFromFilter: (itemFilter: ItemFilter) => void
 
     queryItems: () => void
 
@@ -35,7 +41,7 @@ export interface AppStateData {
     voteItem: (itemId: string) => void
     deleteItem: (itemId: string) => void
 
-    getMainItemList: () => ItemQueryResult
+    getItemList: () => ItemQueryResult
     getAdminActive: () => boolean
     setAdminActive: (active: boolean) => void
     toggleAdminActive: () => void
@@ -51,13 +57,23 @@ export const useAppContext = () => {
 export function AppStateContainer({ children }) {
     const eventBus = useBus()
 
-    const [itemsFilter, setItemsFilter] = useState<ItemFilter>({
-        type: null,
-        page: 1,
-        pageSize: PageSize,
-        tags: null,
-        queryText: null,
-    })
+    console.log('App State COntainer')
+
+    const initialFilter = useMemo(
+        () => ({
+            type: null,
+            page: 1,
+            pageSize: PageSize,
+            tags: null,
+            queryText: null,
+            active: true,
+        }),
+        []
+    )
+
+    const [itemsFilter, setItemsFilter] = useState<ItemFilter>(initialFilter)
+
+    const [loadingResultList, setLoadingResultList] = useState(false)
 
     const router = useRouter()
 
@@ -73,11 +89,17 @@ export function AppStateContainer({ children }) {
     /* ============================================================ */
 
     const queryItems = async () => {
+        console.log('QUERY ITEMS')
+
+        setLoadingResultList(true)
+
         const result = await ItemService.queryItems(itemsFilter)
 
         if (result) {
             setMainItemList(result)
         }
+
+        setLoadingResultList(false)
     }
 
     const createItem = async (request: ItemCreateRequest) => {
@@ -128,14 +150,16 @@ export function AppStateContainer({ children }) {
     /* ===== SEARCH FILTER =======================================  */
     /* ============================================================ */
 
-    const setMainFilterPage = (page: number) => {
+    const setItemFilterPage = (page: number) => {
+        console.log('Set Filter Page')
         setItemsFilter({
             ...itemsFilter,
             page: page,
         })
     }
 
-    const setMainFilterType = (typeId: string) => {
+    const setItemFilterType = (typeId: string) => {
+        console.log('Set Filter Type')
         setItemsFilter({
             ...itemsFilter,
             type: typeId,
@@ -146,17 +170,18 @@ export function AppStateContainer({ children }) {
         return availableTypes
     }
 
-    const getMainFilterType = () => {
+    const getItemFilterType = () => {
         return itemsFilter?.type
             ? availableTypes.find((t) => t.id === itemsFilter.type)
             : everything()
     }
 
-    const getMainFilterPage = () => {
+    const getItemFilterPage = () => {
         return itemsFilter?.page
     }
 
-    const setMainFilterQueryText = (query: string) => {
+    const setItemFilterQueryText = (query: string) => {
+        console.log('Set Filter Query Text')
         setItemsFilter({
             ...itemsFilter,
             queryText: query,
@@ -164,16 +189,20 @@ export function AppStateContainer({ children }) {
         })
     }
 
-    const getMainFilterQueryText = () => {
+    const getItemFilterQueryText = () => {
         return itemsFilter?.queryText
     }
 
-    const setMainFilter = (filter: ItemFilter) => {
-        setItemsFilter(filter)
+    const getItemList = () => {
+        return mainItemList
     }
 
-    const getMainItemList = () => {
-        return mainItemList
+    const isLoadingResultList = () => {
+        return loadingResultList
+    }
+
+    const getItemFilter = () => {
+        return itemsFilter
     }
 
     /* ===== ADMIN  ==============================================  */
@@ -204,18 +233,17 @@ export function AppStateContainer({ children }) {
         }
     }
 
-    const updateFilterFromUrlQuery = async (query) => {
+    const updateFilterFromUrlQuery = (query: any) => {
         if (Object.keys(query).length > 0) {
             const filter = convertQueryToFilter(query)
 
             if (!itemFiltersCompare(filter, itemsFilter)) {
-                console.log('NOT EQUAL')
-                setMainFilter(filter)
+                setItemsFilter(filter)
             }
         }
     }
 
-    const filterToUrlQuery = (itemFilter: ItemFilter) => {
+    const updateUrlQueryFromFilter = (itemFilter: ItemFilter) => {
         if (!itemFilterEmpty(itemFilter)) {
             const url = buildQueryUrl(itemFilter)
             router.push(url)
@@ -224,25 +252,18 @@ export function AppStateContainer({ children }) {
         }
     }
 
-    /* ===========================================================  */
-    /* ============================================================ */
-
     useEffect(() => {
         fetchTypes()
     }, [])
 
     useEffect(() => {
-        updateFilterFromUrlQuery(router.query)
-    }, [router.isReady])
-
-    useEffect(() => {
-        filterToUrlQuery(itemsFilter)
+        if (itemsFilter !== initialFilter) {
+            queryItems()
+        }
     }, [itemsFilter])
 
-    useEffect(() => {
-        console.log('QUERY ITEMS')
-        queryItems()
-    }, [itemsFilter])
+    /* ===========================================================  */
+    /* ============================================================ */
 
     return (
         <AppStateContext.Provider
@@ -254,19 +275,22 @@ export function AppStateContainer({ children }) {
                 addTag,
                 removeTag,
                 getAvailableItemTypes,
-                setMainFilterPage,
-                getMainFilterPage,
-                setMainFilterType,
-                getMainFilterType,
-                setMainFilterQueryText,
-                getMainFilterQueryText,
-                setMainFilter,
-                getMainItemList,
+                setItemFilterPage,
+                getItemFilterPage,
+                setItemFilterType,
+                getItemFilterType,
+                setItemFilterQueryText,
+                getItemFilterQueryText,
+                getItemFilter,
+                getItemList,
                 getAdminActive,
                 setAdminActive,
+                isLoadingResultList,
                 toggleAdminActive,
                 voteItem,
                 deleteItem,
+                updateFilterFromUrlQuery,
+                updateUrlQueryFromFilter,
             }}
         >
             {children}
