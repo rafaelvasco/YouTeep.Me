@@ -64,11 +64,11 @@ export const AuthContainer = ({ children }) => {
         return null
     }
 
-    // useEffect(() => {
-    //     if (!loggedIn) {
-    //         tryAuthorize()
-    //     }
-    // }, [])
+    useEffect(() => {
+        if (!loggedIn) {
+            tryAuthorize()
+        }
+    }, [])
 
     return (
         <AuthContext.Provider value={{ loggedIn, userInfo, storeAuth, clearAuth, tryAuthorize }}>
