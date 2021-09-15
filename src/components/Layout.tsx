@@ -1,7 +1,6 @@
-import { AuthContext } from '@/contexts/authContext'
+import { useAuthContext } from '@/contexts/authContext'
 import siteMetadata from '@/data/siteMetadata.json'
 import { UserRole } from '@/types/UserRole'
-import { useContext } from 'react'
 import { AdminButton } from './AdminButton'
 import { Footer } from './Footer'
 import { LinkEx } from './Link'
@@ -10,7 +9,7 @@ import { ThemeSwitch } from './ThemeSwitch'
 import { UserButton } from './UserButton'
 
 export const Layout = ({ children }) => {
-    const { loggedIn, userInfo } = useContext(AuthContext)
+    const { isLoggedIn, getUserInfo } = useAuthContext()
 
     return (
         <div className="flex flex-col justify-between p-5">
@@ -34,7 +33,7 @@ export const Layout = ({ children }) => {
                     <div className="flex items-center text-base leading-5">
                         <ThemeSwitch />
                     </div>
-                    {loggedIn && userInfo.role === UserRole.ADMIN ? <AdminButton /> : null}
+                    {isLoggedIn() && getUserInfo().role === UserRole.ADMIN ? <AdminButton /> : null}
                 </header>
             </SectionContainer>
 

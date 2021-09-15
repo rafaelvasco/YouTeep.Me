@@ -1,11 +1,12 @@
-import { AuthContext } from '@/contexts/authContext'
+import { useAuthContext } from '@/contexts/authContext'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
 import { FaUser } from 'react-icons/fa'
 
 export const UserButton = () => {
-    const { loggedIn, userInfo, clearAuth } = useContext(AuthContext)
+    const { isLoggedIn, getUserInfo, clearAuth } = useAuthContext()
 
     const [isSectionOpen, setIsSectionOpen] = useState(false)
     const dropDownElement = useRef<HTMLDivElement>()
@@ -25,7 +26,7 @@ export const UserButton = () => {
     }, [])
 
     const handleClick = () => {
-        if (loggedIn) {
+        if (isLoggedIn()) {
             setIsSectionOpen(!isSectionOpen)
         } else {
             router.push('/login')
@@ -33,8 +34,9 @@ export const UserButton = () => {
     }
 
     const handleLogout = async () => {
-        clearAuth()
+        await clearAuth()
         setIsSectionOpen(false)
+        toast.success('User Logged Out')
     }
 
     useEffect(() => {
@@ -53,7 +55,11 @@ export const UserButton = () => {
                 className="rounded-md mr-4 p-3 text-gray-800 dark:text-white font-light outline-none focus:outline-none hover:text-black dark:hover:text-gray-50 text-xl"
             >
                 <FaUser className="inline-flex mr-4" />
-                {loggedIn ? <span className="text-sm inline-flex">{userInfo.email}</span> : false}
+                {isLoggedIn() ? (
+                    <span className="text-sm inline-flex">{getUserInfo().email}</span>
+                ) : (
+                    false
+                )}
             </button>
 
             <div
@@ -61,7 +67,7 @@ export const UserButton = () => {
                 ref={dropDownElement}
                 className="p-5 w-60 duration-500 ease-in-out absolute z-20 bg-white dark:bg-gray-800 rounded overflow-hidden shadow-lg"
             >
-                {loggedIn ? (
+                {isLoggedIn() ? (
                     <>
                         <div className="mt-2">
                             <Link href="">

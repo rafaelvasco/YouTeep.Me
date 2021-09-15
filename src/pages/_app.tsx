@@ -18,21 +18,36 @@ import '@/styles/tailwind.css'
 import '@/styles/global.css'
 import 'nprogress/nprogress.css'
 import 'react-markdown-editor-lite/lib/index.css'
-import { AuthContainer } from '@/contexts/authContext'
-import { AppStateContainer } from '@/contexts/appContext'
-import { RequestResponseInterceptor } from '@/backend/requestResponseInterceptor'
+import { AuthProvider } from '@/contexts/authContext'
+import { AppStateProvider } from '@/contexts/appContext'
 import { Layout } from '@/components/Layout'
+import { AppActionsProvider } from '@/contexts/appActionsContext'
+import { useEffect } from 'react'
+import api from '@/backend/api'
 
 Router.events.on('routeChangeStart', () => NProgress.start())
 Router.events.on('routeChangeComplete', () => NProgress.done())
 Router.events.on('routeChangeError', () => NProgress.done())
 
 const App = ({ Component, pageProps }: AppProps) => {
+    useEffect(() => {
+        api.interceptors.request.use(
+            (config) => {
+                NProgress.start()
+                return config
+            },
+            (error) => {
+                NProgress.done()
+                return Promise.reject(error)
+            }
+        )
+    }, [])
+
     return (
         <MsgBusProvider>
-            <AppStateContainer>
-                <AuthContainer>
-                    <RequestResponseInterceptor>
+            <AppStateProvider>
+                <AppActionsProvider>
+                    <AuthProvider>
                         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
                             <Head>
                                 <meta
@@ -47,9 +62,9 @@ const App = ({ Component, pageProps }: AppProps) => {
                                 <div id="modal-container"></div>
                             </Layout>
                         </ThemeProvider>
-                    </RequestResponseInterceptor>
-                </AuthContainer>
-            </AppStateContainer>
+                    </AuthProvider>
+                </AppActionsProvider>
+            </AppStateProvider>
         </MsgBusProvider>
     )
 }

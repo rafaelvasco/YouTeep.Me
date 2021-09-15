@@ -20,6 +20,7 @@ import { useAppContext } from '@/contexts/appContext'
 import { ItemService } from '@/backend/itemService'
 import { useRouter } from 'next/router'
 import { Toggler } from './Toggler'
+import { useAppActions } from '@/contexts/appActionsContext'
 
 const ModalComponent = dynamic(() => import('@/components/Modal').then((mod) => mod.Modal), {
     ssr: false,
@@ -27,6 +28,7 @@ const ModalComponent = dynamic(() => import('@/components/Modal').then((mod) => 
 
 export const AdminPanelItems = () => {
     const appState = useAppContext()
+    const appActions = useAppActions()
 
     const eventBus = useBus()
 
@@ -213,7 +215,7 @@ export const AdminPanelItems = () => {
                     {deleteModalOpen ? (
                         <ModalComponent
                             confirm={() => {
-                                appState.deleteItem(itemToDelete)
+                                appActions.deleteItem(itemToDelete)
                             }}
                             setOpen={setDeleteModalOpen}
                             confirmLabel="Yes, Remove"

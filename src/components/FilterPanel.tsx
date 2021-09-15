@@ -101,6 +101,8 @@ export const FilterPanel = () => {
         return null
     }
 
+    console.log('Filter Panel Render')
+
     return (
         <>
             <div className="flex my-5">
@@ -158,5 +160,3 @@ export const FilterPanel = () => {
         </>
     )
 }
-
-FilterPanel.whyDidYouRender = true

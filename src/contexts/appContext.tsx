@@ -1,64 +1,48 @@
-import { ItemFilter, itemFilterEmpty, itemFiltersCompare } from '@/types/ItemFilter'
+import { ItemFilter } from '@/types/ItemFilter'
 import { PageSize } from '@/data/config'
 import { everything, ItemType } from '@/types/ItemType'
 import { createContext, useContext, useState } from 'react'
-import toast from 'react-hot-toast'
 import { ItemQueryResult } from '@/types/ItemQueryResult'
-import { useBus } from 'react-bus'
-import { ComponentEvents } from '@/components/events'
-import { ItemCreateRequest } from '@/types/ItemCreateRequest'
-import { ItemService } from '@/backend/itemService'
-import { useRouter } from 'next/router'
-import { buildQueryUrl } from '@/lib/utils'
 import { useMemo } from 'react'
-import { useEffect } from 'react'
+import { useEffect } from 'react-router/node_modules/@types/react'
 
-export interface AppStateData {
-    availableTypes: ItemType[]
-    availableTags: string[]
-
+interface AppStateInterface {
     isLoadingResultList: () => boolean
-
     getAvailableItemTypes: () => Array<ItemType>
-    setItemFilterPage: (page: number) => void
     getItemFilterPage: () => number
-    setItemFilterType: (typeId: string) => void
     getItemFilterType: () => ItemType
-    setItemFilterQueryText: (query: string) => void
     getItemFilterQueryText: () => string
     getItemFilter: () => ItemFilter
-
-    updateFilterFromUrlQuery: (query: any) => void
-    updateUrlQueryFromFilter: (itemFilter: ItemFilter) => void
-
-    queryItems: () => void
-
-    createItem: (request: ItemCreateRequest) => void
-
-    addTag: (tag: string) => void
-    removeTag: (tag: string) => void
-
-    voteItem: (itemId: string) => void
-    deleteItem: (itemId: string) => void
-
     getItemList: () => ItemQueryResult
     getAdminActive: () => boolean
+
+    setItemsFilter: (filter: ItemFilter) => void
+    setItemFilterPage: (page: number) => void
+    setItemFilterType: (typeId: string) => void
+    setItemFilterQueryText: (query: string) => void
     setAdminActive: (active: boolean) => void
+
     toggleAdminActive: () => void
+
+    setAvailableTypes: (types: Array<ItemType>) => void
+    setLoadingResultList: (loading: boolean) => void
+    setMainItemList: (result: ItemQueryResult) => void
+    setAvailableTags: (tags: Array<any>) => void
 }
 
-const AppStateContext = createContext({} as AppStateData)
+const AppStateContext = createContext({} as AppStateInterface)
 
 export const useAppContext = () => {
     const ctx = useContext(AppStateContext)
+
+    if (ctx === undefined) {
+        throw new Error('useAppContext must be used within an AppStateContainer')
+    }
+
     return ctx
 }
 
-export function AppStateContainer({ children }) {
-    const eventBus = useBus()
-
-    console.log('App State COntainer')
-
+export function AppStateProvider({ children }) {
     const initialFilter = useMemo(
         () => ({
             type: null,
@@ -75,8 +59,6 @@ export function AppStateContainer({ children }) {
 
     const [loadingResultList, setLoadingResultList] = useState(false)
 
-    const router = useRouter()
-
     const [mainItemList, setMainItemList] = useState<ItemQueryResult>(null)
 
     const [availableTypes, setAvailableTypes] = useState<ItemType[]>([])
@@ -84,87 +66,6 @@ export function AppStateContainer({ children }) {
     const [adminActivated, setAdminActivated] = useState(false)
 
     const [availableTags, setAvailableTags] = useState([])
-
-    /* ===== ITEM ================================================  */
-    /* ============================================================ */
-
-    const queryItems = async () => {
-        console.log('QUERY ITEMS')
-
-        setLoadingResultList(true)
-
-        const result = await ItemService.queryItems(itemsFilter)
-
-        if (result) {
-            setMainItemList(result)
-        }
-
-        setLoadingResultList(false)
-    }
-
-    const createItem = async (request: ItemCreateRequest) => {
-        const result = await ItemService.createItem(request)
-
-        if (result) {
-            toast.success(`Item Created Successfully!`)
-            await queryItems()
-        }
-    }
-
-    const voteItem = async (itemId: string) => {
-        const itemDb = await ItemService.getItem(itemId)
-
-        const result = await ItemService.voteItem(itemId, itemDb.votes + 1)
-
-        if (result) {
-            await queryItems()
-        }
-        eventBus.emit(ComponentEvents.ItemListModified)
-    }
-
-    const deleteItem = async (itemId: string) => {
-        const result = await ItemService.deleteItem(itemId)
-
-        if (result) {
-            await queryItems()
-            toast.success(`Item Removed Successfully!`)
-            eventBus.emit(ComponentEvents.ItemListModified)
-        }
-    }
-
-    /* ===== TYPES ================================================ */
-    /* ============================================================ */
-
-    const fetchTypes = async () => {
-        const types = await ItemService.fetchItemTypes()
-        setAvailableTypes(types)
-    }
-
-    /* ===== TAGS ================================================= */
-    /* ============================================================ */
-
-    const addTag = (tag: string) => {}
-
-    const removeTag = (tag: string) => {}
-
-    /* ===== SEARCH FILTER =======================================  */
-    /* ============================================================ */
-
-    const setItemFilterPage = (page: number) => {
-        console.log('Set Filter Page')
-        setItemsFilter({
-            ...itemsFilter,
-            page: page,
-        })
-    }
-
-    const setItemFilterType = (typeId: string) => {
-        console.log('Set Filter Type')
-        setItemsFilter({
-            ...itemsFilter,
-            type: typeId,
-        })
-    }
 
     const getAvailableItemTypes = () => {
         return availableTypes
@@ -178,15 +79,6 @@ export function AppStateContainer({ children }) {
 
     const getItemFilterPage = () => {
         return itemsFilter?.page
-    }
-
-    const setItemFilterQueryText = (query: string) => {
-        console.log('Set Filter Query Text')
-        setItemsFilter({
-            ...itemsFilter,
-            queryText: query,
-            page: 1,
-        })
     }
 
     const getItemFilterQueryText = () => {
@@ -205,11 +97,33 @@ export function AppStateContainer({ children }) {
         return itemsFilter
     }
 
-    /* ===== ADMIN  ==============================================  */
-    /* ============================================================ */
-
     const getAdminActive = () => {
         return adminActivated
+    }
+
+    const setItemFilterPage = (page: number) => {
+        console.log('Set Filter Page')
+        setItemsFilter({
+            ...itemsFilter,
+            page: page,
+        })
+    }
+
+    const setItemFilterType = (typeId: string) => {
+        console.log('Set Filter Type')
+        setItemsFilter({
+            ...itemsFilter,
+            type: typeId,
+        })
+    }
+
+    const setItemFilterQueryText = (query: string) => {
+        console.log('Set Filter Query Text')
+        setItemsFilter({
+            ...itemsFilter,
+            queryText: query,
+            page: 1,
+        })
     }
 
     const setAdminActive = (active: boolean) => {
@@ -223,77 +137,32 @@ export function AppStateContainer({ children }) {
     /* ===== INITIALIZATION========================================  */
     /* ============================================================ */
 
-    const convertQueryToFilter = (query): ItemFilter => {
-        return {
-            type: query.type ? (query.type as string) : null,
-            tags: query.tags ?? null,
-            page: parseInt(query.page) ?? 1,
-            pageSize: PageSize,
-            queryText: query.queryText ?? null,
-        }
-    }
-
-    const updateFilterFromUrlQuery = (query: any) => {
-        if (Object.keys(query).length > 0) {
-            const filter = convertQueryToFilter(query)
-
-            if (!itemFiltersCompare(filter, itemsFilter)) {
-                setItemsFilter(filter)
-            }
-        }
-    }
-
-    const updateUrlQueryFromFilter = (itemFilter: ItemFilter) => {
-        if (!itemFilterEmpty(itemFilter)) {
-            const url = buildQueryUrl(itemFilter)
-            router.push(url)
-        } else {
-            router.replace('/')
-        }
-    }
-
-    useEffect(() => {
-        fetchTypes()
-    }, [])
-
-    useEffect(() => {
-        if (itemsFilter !== initialFilter) {
-            queryItems()
-        }
-    }, [itemsFilter])
+    const value = useMemo(
+        () => ({
+            getAvailableItemTypes,
+            getItemFilterPage,
+            getItemFilterType,
+            getItemFilterQueryText,
+            getItemFilter,
+            getItemList,
+            getAdminActive,
+            setItemsFilter,
+            setItemFilterType,
+            setItemFilterQueryText,
+            setAvailableTypes,
+            setItemFilterPage,
+            setAdminActive,
+            setMainItemList,
+            setAvailableTags,
+            setLoadingResultList,
+            isLoadingResultList,
+            toggleAdminActive,
+        }),
+        [itemsFilter, mainItemList, loadingResultList, adminActivated, availableTypes]
+    )
 
     /* ===========================================================  */
     /* ============================================================ */
 
-    return (
-        <AppStateContext.Provider
-            value={{
-                availableTypes,
-                availableTags,
-                createItem,
-                queryItems,
-                addTag,
-                removeTag,
-                getAvailableItemTypes,
-                setItemFilterPage,
-                getItemFilterPage,
-                setItemFilterType,
-                getItemFilterType,
-                setItemFilterQueryText,
-                getItemFilterQueryText,
-                getItemFilter,
-                getItemList,
-                getAdminActive,
-                setAdminActive,
-                isLoadingResultList,
-                toggleAdminActive,
-                voteItem,
-                deleteItem,
-                updateFilterFromUrlQuery,
-                updateUrlQueryFromFilter,
-            }}
-        >
-            {children}
-        </AppStateContext.Provider>
-    )
+    return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>
 }

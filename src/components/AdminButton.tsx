@@ -1,5 +1,4 @@
 import { useAppContext } from '@/contexts/appContext'
-import { useEffect } from 'react'
 import { RiAdminFill } from 'react-icons/ri'
 
 export const AdminButton = () => {

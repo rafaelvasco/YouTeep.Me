@@ -2,13 +2,14 @@ import { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import toast from 'react-hot-toast'
-import { AuthContext } from '@/contexts/authContext'
+import { useAuthContext } from '@/contexts/authContext'
 import { Select } from './Select'
 import { TextInput } from './TextInput'
 import { ImageScraper } from './ImageScraper'
 import { ImageInputFile } from './ImageInputFile'
 import { useAppContext } from '@/contexts/appContext'
 import { ItemCreateRequest } from '@/types/ItemCreateRequest'
+import { useAppActions } from '@/contexts/appActionsContext'
 
 type Inputs = {
     itemName: string
@@ -19,8 +20,9 @@ type Inputs = {
 
 export const ItemCreator = () => {
     const appState = useAppContext()
+    const appActions = useAppActions()
 
-    const { userInfo } = useContext(AuthContext)
+    const { getUserInfo } = useAuthContext()
 
     const [expanded, setExpanded] = useState(false)
 
@@ -34,7 +36,7 @@ export const ItemCreator = () => {
     const onSubmit = async (data: Inputs) => {
         let requestBody = {
             name: data.itemName,
-            userId: userInfo.id,
+            userId: getUserInfo().id,
             typeId: data.itemType,
             content: '',
         } as ItemCreateRequest
@@ -49,7 +51,7 @@ export const ItemCreator = () => {
         }
 
         try {
-            appState.createItem(requestBody)
+            appActions.createItem(requestBody)
             resetForm()
         } catch (e) {}
     }
@@ -90,7 +92,7 @@ export const ItemCreator = () => {
                                     </small>
                                 </label>
 
-                                {userInfo.role === 'ADMIN' ? (
+                                {getUserInfo().role === 'ADMIN' ? (
                                     <>
                                         <label className="block">
                                             <span className="text-gray-700 dark:text-gray-200">

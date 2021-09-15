@@ -3,13 +3,17 @@ import { ItemCard } from './ItemCard'
 import { useAppContext } from '@/contexts/appContext'
 import Loader from 'react-loader-spinner'
 import { useEffect } from 'react'
+import { useAppActions } from '@/contexts/appActionsContext'
 
 export const MainItemList = () => {
     const appState = useAppContext()
+    const appActions = useAppActions()
 
     useEffect(() => {
-        appState.queryItems()
+        appActions.queryItems()
     }, [])
+
+    console.log('Main Item List Render')
 
     return (
         <>
